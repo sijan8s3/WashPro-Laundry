@@ -4,6 +4,8 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout
 from .forms import OrderForm, OrderClothForm, OrderClothFormSet
 from base.models import Order, Clothes
+from django.contrib import messages
+
 
 
 # Create your views here.
@@ -26,6 +28,8 @@ def create_order(request):
             order_cloth_formset.instance = order
             order_cloth_formset.save()
             return redirect('dashboard:order_detail', order_id=order.pk)
+        else:
+            messages.error(request, 'Error occurred while adding the order.')
     else:
         order_form = OrderForm()
         order_cloth_formset = OrderClothFormSet()
@@ -37,7 +41,6 @@ def create_order(request):
         'order_cloth_formset': order_cloth_formset,
         'clothes': clothes  # Pass the clothes to the template
     })
-
 
 def order_detail(request, order_id):
     order = Order.objects.get(pk=order_id)
