@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from .forms import OrderForm, OrderClothForm, OrderClothFormSet
-from base.models import Order, Clothes
+from base.models import Order, Clothes, OrderItem
 from django.contrib import messages
+from django.forms import formset_factory
+
 
 
 
@@ -16,31 +18,41 @@ def home(request):
     return render(request=request, template_name='dashboard/home.html', context=context)
 
 
-
 def create_order(request):
+    OrderClothFormSet = formset_factory(OrderClothForm, extra=1)
+    
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
         order_cloth_formset = OrderClothFormSet(request.POST)
+        
         if order_form.is_valid() and order_cloth_formset.is_valid():
             order = order_form.save(commit=False)
             order.user = request.user
+            order.status = "pending"
             order.save()
-            order_cloth_formset.instance = order
-            order_cloth_formset.save()
+            
+            for form in order_cloth_formset:
+                cloth = form.cleaned_data['cloth']
+                quantity = form.cleaned_data['quantity']
+                OrderItem.objects.create(order=order, cloth=cloth, quantity=quantity)
+            
             return redirect('dashboard:order_detail', order_id=order.pk)
         else:
-            messages.error(request, 'Error occurred while adding the order.')
+            error_message = 'Error occurred while adding the order.'
+            messages.error(request, error_message)
     else:
         order_form = OrderForm()
         order_cloth_formset = OrderClothFormSet()
     
-    clothes = Clothes.objects.all()  # Get all clothes from the database
+    clothes = Clothes.objects.all()
     
     return render(request, 'dashboard/create_order.html', {
         'order_form': order_form,
         'order_cloth_formset': order_cloth_formset,
-        'clothes': clothes  # Pass the clothes to the template
+        'clothes': clothes,
     })
+
+
 
 def order_detail(request, order_id):
     order = Order.objects.get(pk=order_id)
