@@ -4,12 +4,7 @@
 {% block content %}
 <!-- Add Bootstrap CSS link -->
 <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
-
-<form action="{% url 'account:logout' %}" method="POST">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-outline-light ml-2">Logout</button>
-</form>
-
+<br>
 <div class="container">
     <div class="row">
         <div class="col-md-3">
@@ -32,7 +27,18 @@
                 <h2>Users</h2>
                 <ul class="list-group bg-secondary">
                     {% for user in users %}
-                    <li class="list-group-item text-black">{{ user.username }}</li>
+                    <li class="list-group-item text-black">
+                        <div class="user-header" onclick="toggleUserDetails(this)">
+                            {{ user.username }}
+                        </div>
+                        <div class="user-details" style="display: none;">
+                            <p>First Name: {{ user.first_name }}</p>
+                            <p>Last Name: {{ user.last_name }}</p>
+                            <p>Username: {{ user.username }}</p>
+                            <p>Email: {{ user.email }}</p>
+                            <p>Password: *****</p>
+                        </div>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
@@ -40,7 +46,18 @@
                 <h2>Orders</h2>
                 <ul class="list-group bg-secondary">
                     {% for order in orders %}
-                    <li class="list-group-item text-black">Order #{{ order.pk }}</li>
+                    <li class="list-group-item text-black">
+                        <div class="order-header" onclick="toggleOrderDetails(this)">
+                            Order #{{ order.pk }}
+                        </div>
+                        <div class="order-details" style="display: none;">
+                            <p>User: {{ order.user }}</p>
+                            <p>Collection Center: {{ order.collection_center }}</p>
+                            <p>Pickup Location: {{ order.pickup_location }}</p>
+                            <p>Pickup Date: {{ order.pickup_date }}</p>
+                            <p>Status: {{ order.status }}</p>
+                        </div>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
@@ -48,7 +65,17 @@
                 <h2>Collection Centers</h2>
                 <ul class="list-group bg-secondary">
                     {% for center in collection_centers %}
-                    <li class="list-group-item text-black">{{ center.name }}</li>
+                    <li class="list-group-item text-black">
+                        <div class="center-header" onclick="toggleCenterDetails(this)">
+                            {{ center.name }}
+                        </div>
+                        <div class="center-details" style="display: none;">
+                            <p>Address: {{ center.address }}</p>
+                            <p>Description: {{ center.description }}</p>
+                            <p>Active Status: {% if center.active %}Active{% else %}Inactive{% endif %}</p>
+                            <p>Incharge: {{ center.incharge }}</p>
+                        </div>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
@@ -71,6 +98,33 @@
     var contentSections = document.getElementsByClassName("content-section");
     for (var i = 0; i < contentSections.length; i++) {
         contentSections[i].style.display = "none";
+    }
+
+    function toggleOrderDetails(element) {
+        var details = element.nextElementSibling;
+        if (details.style.display === "none") {
+            details.style.display = "block";
+        } else {
+            details.style.display = "none";
+        }
+    }
+
+    function toggleCenterDetails(element) {
+        var details = element.nextElementSibling;
+        if (details.style.display === "none") {
+            details.style.display = "block";
+        } else {
+            details.style.display = "none";
+        }
+    }
+
+    function toggleUserDetails(element) {
+        var details = element.nextElementSibling;
+        if (details.style.display === "none") {
+            details.style.display = "block";
+        } else {
+            details.style.display = "none";
+        }
     }
 </script>
 {% endblock %}
