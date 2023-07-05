@@ -19,38 +19,53 @@ def home(request):
 
 
 def create_order(request):
-    OrderClothFormSet = formset_factory(OrderClothForm, extra=1)
-    
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
-        order_cloth_formset = OrderClothFormSet(request.POST)
-        
-        if order_form.is_valid() and order_cloth_formset.is_valid():
+        formset = OrderClothFormSet(request.POST)
+
+
+
+
+        if order_form.is_valid():
             order = order_form.save(commit=False)
             order.user = request.user
-            order.status = "pending"
             order.save()
-            
-            for form in order_cloth_formset:
+        else:
+            print(order_form.errors)
+
+        if formset.is_valid():
+            # Process the formset
+            print('nice')
+        else:
+            print(formset.errors)
+
+
+        if order_form.is_valid() and formset.is_valid():
+            order = order_form.save(commit=False)
+            order.user = request.user
+            order.save()
+
+            for form in formset:
                 cloth = form.cleaned_data['cloth']
                 quantity = form.cleaned_data['quantity']
                 OrderItem.objects.create(order=order, cloth=cloth, quantity=quantity)
-            
-            return redirect('dashboard:order_detail', order_id=order.pk)
+
+            messages.success(request, 'Order created successfully.')
+            return redirect('dashboard:order_detail', pk=order.pk)
         else:
-            error_message = 'Error occurred while adding the order.'
-            messages.error(request, error_message)
+            messages.error(request, 'Failed to create the order. Please check the form.')
+
     else:
         order_form = OrderForm()
-        order_cloth_formset = OrderClothFormSet()
-    
+        formset = OrderClothFormSet()
     clothes = Clothes.objects.all()
-    
-    return render(request, 'dashboard/create_order.html', {
+    context = {
         'order_form': order_form,
-        'order_cloth_formset': order_cloth_formset,
+        'formset': formset,
         'clothes': clothes,
-    })
+    }
+
+    return render(request, 'dashboard/create_order.html', context)
 
 
 
