@@ -53,11 +53,10 @@ class CollectionCenter(models.Model):
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    clothes = models.ManyToManyField('Clothes', through='OrderItem')
     collection_center = models.ForeignKey(CollectionCenter, on_delete=models.CASCADE)
     pickup_location = models.CharField(max_length=200)
     pickup_date = models.DateField()
-    status = models.CharField(max_length=20)
+    status = models.CharField(max_length=20, default='pending')
     created = models.DateTimeField(auto_now_add=True)
     update= models.DateTimeField(auto_now=True)
 

@@ -1,23 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container">
-        <div class="card">
-            <h3 class="text-center mb-4">Login to WashPro</h3>
-            <form method="POST" action="{% url 'account:login' %}">
+<div class="container d-flex align-items-center justify-content-center vh-100">
+    <div class="card shadow-lg animated fadeInDown">
+        <h3 class="card-header text-center">Login to WashPro</h3>
+        <div class="card-body">
+            <form method="POST" action="{% url 'account:login' %}" class="needs-validation" novalidate>
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="text" class="form-control" id="email" name="username" placeholder="Enter your email">
+                    <input type="text" class="form-control" id="email" name="username" placeholder="Enter your email" required>
+                    <div class="invalid-feedback">
+                        Please enter a valid email.
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                 <i class="fas fa-eye"></i>
                             </button>
+                        </div>
+                        <div class="invalid-feedback">
+                            Please enter your password.
                         </div>
                     </div>
                 </div>
@@ -30,42 +37,65 @@
             </form>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="loginFailedModal" tabindex="-1" role="dialog" aria-labelledby="loginFailedModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loginFailedModalLabel">Login Failed</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {% for message in messages %}
-                        <p>{{ message }}</p>
-                    {% endfor %}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+<div class="modal fade" id="loginFailedModal" tabindex="-1" role="dialog" aria-labelledby="loginFailedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginFailedModalLabel">Login Failed</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            {% if messages %}
-                $('#loginFailedModal').modal('show');
-            {% endif %}
-            
-            $('#togglePassword').click(function() {
-                const passwordInput = $('#password');
-                const passwordType = passwordInput.attr('type');
-                passwordInput.attr('type', passwordType === 'password' ? 'text' : 'password');
-                $(this).find('i').toggleClass('fa-eye fa-eye-slash');
-            });
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        {% if messages %}
+            $('#loginFailedModal').modal('show');
+        {% endif %}
+
+        $('#email').on('input', function() {
+            const emailInput = $(this);
+            const email = emailInput.val().trim();
+            const passwordInput = $('#password');
+
+            if (email.length > 0) {
+                passwordInput.closest('.form-group').slideDown();
+            } else {
+                passwordInput.closest('.form-group').slideUp();
+            }
         });
-    </script>
+
+        $('#togglePassword').click(function() {
+            const passwordInput = $('#password');
+            const passwordType = passwordInput.attr('type');
+            passwordInput.attr('type', passwordType === 'password' ? 'text' : 'password');
+            $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+        });
+        
+        // Form validation
+        $('form').on('submit', function(event) {
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            $(this).addClass('was-validated');
+        });
+    });
+</script>
 {% endblock %}
