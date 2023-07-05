@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WashPro{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Custom styles go here */
+
+        .signup-form {
+            width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .signup-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .signup-form .hint-text {
+            color: #999;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .signup-form .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .signup-form .input-group-addon {
+            width: 40px;
+            min-width: 40px;
+            padding: 0;
+            text-align: center;
+        }
+        
+        .signup-form .form-control {
+            height: 40px;
+            font-size: 14px;
+        }
+        
+        .signup-form .btn {
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #f0ad4e;
+            border-color: #f0ad4e;
+        }
+
+
+
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">WashPro</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Subscription</a>
+                    </li>
+
+
+                    {% if user.is_authenticated %}
+
+                    <a class="nav-link" href="{% url 'account:logout' %}">
+                        <button class="btn btn-outline-light ml-2" name="login">Logout</button>
+                    </a>
+
+                    {% else %}
+
+                    <li class="nav-item">
+                        <a href="{% url 'account:register' %}">
+                        <button class="btn btn-primary nav-link">Signup</button>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'account:login' %}">
+                        <button class="btn btn-outline-light nav-link">Login</button>
+                        </a>
+                    </li>
+
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light text-center py-4">
+        <div class="container">
+            <p>&copy; {{ year }} WashPro. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
