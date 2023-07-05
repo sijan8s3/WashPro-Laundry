@@ -1,11 +1,76 @@
-DASHBOARD
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Add Bootstrap CSS link -->
+<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
 
 <form action="{% url 'account:logout' %}" method="POST">
     {% csrf_token %}
     <button type="submit" class="btn btn-outline-light ml-2">Logout</button>
 </form>
-{{user.first_name}} {{user.last_name}} </br>
-{{user.username}} </br>
-{{user.email}} </br>
-UserType: {{user.user_type}} </br>
 
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <ul class="nav flex-column bg-secondary">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#users" onclick="showContent('users')">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#orders" onclick="showContent('orders')">Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#collection-centers" onclick="showContent('collection-centers')">Collection Centers</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div id="users" class="content-section">
+                <h2>Users</h2>
+                <ul class="list-group bg-secondary">
+                    {% for user in users %}
+                    <li class="list-group-item text-black">{{ user.username }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div id="orders" class="content-section">
+                <h2>Orders</h2>
+                <ul class="list-group bg-secondary">
+                    {% for order in orders %}
+                    <li class="list-group-item text-black">Order #{{ order.pk }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div id="collection-centers" class="content-section">
+                <h2>Collection Centers</h2>
+                <ul class="list-group bg-secondary">
+                    {% for center in collection_centers %}
+                    <li class="list-group-item text-black">{{ center.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Bootstrap JS script -->
+<script src="{% static 'bootstrap.min.js' %}"></script>
+<script>
+    function showContent(sectionId) {
+        var contentSections = document.getElementsByClassName("content-section");
+        for (var i = 0; i < contentSections.length; i++) {
+            contentSections[i].style.display = "none";
+        }
+        document.getElementById(sectionId).style.display = "block";
+    }
+
+    // Hide all content sections initially
+    var contentSections = document.getElementsByClassName("content-section");
+    for (var i = 0; i < contentSections.length; i++) {
+        contentSections[i].style.display = "none";
+    }
+</script>
+{% endblock %}

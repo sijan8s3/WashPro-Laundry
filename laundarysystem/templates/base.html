@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         /* Custom styles go here */
-
         .signup-form {
             width: 400px;
             margin: 0 auto;
@@ -48,76 +47,94 @@
             background-color: #f0ad4e;
             border-color: #f0ad4e;
         }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
 
+        .content {
+            flex: 1;
+        }
 
+        footer {
+            background-color: #343a40;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
 
+        /* Additional styles for responsiveness */
+        @media (max-width: 575.98px) { /* Small devices (up to 575px) */
+            .navbar-toggler {
+                margin-right: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">WashPro</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Features</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Pricing</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Subscription</a>
-                    </li>
+    <div class="d-flex flex-column min-vh-100">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">WashPro</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Features</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Pricing</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Subscription</a>
+                        </li>
 
-
-                    {% if user.is_authenticated %}
-
-                    <a class="nav-link" href="{% url 'account:logout' %}">
-                        <button class="btn btn-outline-light ml-2" name="login">Logout</button>
-                    </a>
-
-                    {% else %}
-
-                    <li class="nav-item">
-                        <a href="{% url 'account:register' %}">
-                        <button class="btn btn-primary nav-link">Signup</button>
+                        {% if user.is_authenticated %}
+                        <a class="nav-link" href="{% url 'account:logout' %}">
+                            <button class="btn btn-outline-light ml-2" name="login">Logout</button>
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'account:login' %}">
-                        <button class="btn btn-outline-light nav-link">Login</button>
-                        </a>
-                    </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a href="{% url 'account:register' %}">
+                            <button class="btn btn-primary nav-link">Signup</button>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'account:login' %}">
+                            <button class="btn btn-outline-light nav-link">Login</button>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
-                    {% endif %}
-
-                </ul>
+        <!-- Content -->
+        <div class="content">
+            <div class="container">
+                {% block content %}
+                {% endblock %}
             </div>
         </div>
-    </nav>
 
-    <!-- Content -->
-    <div class="container">
-        {% block content %}
-        {% endblock %}
+        <!-- Footer -->
+        <footer class="bg-dark text-light text-center py-4">
+            <div class="container">
+                <p>&copy; {{ year }} WashPro. All rights reserved.</p>
+            </div>
+        </footer>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-light text-center py-4">
-        <div class="container">
-            <p>&copy; {{ year }} WashPro. All rights reserved.</p>
-        </div>
-    </footer>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
