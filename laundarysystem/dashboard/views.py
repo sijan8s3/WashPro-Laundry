@@ -3,10 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from .forms import OrderForm, OrderClothForm, OrderClothFormSet
-from base.models import Order, Clothes, OrderItem
+from base.models import Order, Clothes, CollectionCenter
 from django.contrib import messages
+from accounts.models import CustomUser
 from django.forms import formset_factory
-
 
 
 
@@ -14,7 +14,14 @@ from django.forms import formset_factory
 
 @login_required(login_url='account:login')
 def home(request):
-    context= {'user': request.user}
+    orders = Order.objects.all()
+    collection_centers = CollectionCenter.objects.all()
+    users = CustomUser.objects.all()
+    context= { 
+        'orders': orders,
+        'collection_centers': collection_centers,
+        'users': users,
+    }
     return render(request=request, template_name='dashboard/home.html', context=context)
 
 
