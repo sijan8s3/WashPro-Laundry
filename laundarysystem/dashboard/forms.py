@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import formset_factory
-from base.models import Order, OrderItem, CollectionCenter, Clothes, Cloth_Category
+from base.models import Order, OrderItem, CollectionCenter, Clothes, Cloth_Category, Subscription
 
 
 class OrderForm(forms.ModelForm):
@@ -41,6 +41,12 @@ class ClothCategoryForm(forms.ModelForm):
     class Meta:
         model = Cloth_Category
         fields = ['name']
+
+
+class SubscriptionForm(forms.ModelForm):
+    class Meta:
+        model = Subscription
+        fields = ['name', 'price', 'pickup', 'validity', 'weight']
 
 
 

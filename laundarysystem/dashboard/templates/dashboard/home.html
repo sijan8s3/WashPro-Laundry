@@ -26,6 +26,9 @@
           <li class="nav-item">
             <a class="nav-link text-white" href="#cloth-categories" onclick="showContent('cloth-categories')">Cloth Categories</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link text-white" href="#subscriptions" onclick="showContent('subscriptions')">Subscriptions</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -310,7 +313,6 @@
               </button>
               <button class="btn btn-sm btn-success" onclick="window.location.href='{% url 'dashboard:update_cloth' cloth.pk %}'">
                 <i class="fas fa-edit"></i>
-              
               </button>
               <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteClothModal{{ cloth.pk }}">
                 <i class="fas fa-trash"></i>
@@ -375,6 +377,9 @@
         </tbody>
       </table>
     </div>
+
+
+    <!--Cloth Categories-->
     <div id="cloth-categories" class="content-section">
       <h2>Cloth Categories</h2>
       <table class="table table-hover">
@@ -448,6 +453,99 @@
         </tbody>
       </table>
     </div>
+
+
+    <!-- Subscriptions-->
+    <div id="subscriptions" class="content-section">
+      <h2>Subscriptions</h2>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Pickup</th>
+            <th>Validity</th>
+            <th>Weight</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for subscription in subscriptions %}
+          <tr>
+            <td>{{ subscription.name }}</td>
+            <td>{{ subscription.price }}</td>
+            <td>{{ subscription.pickup }}</td>
+            <td>{{ subscription.validity }}</td>
+            <td>{{ subscription.weight }}</td>
+            <td>
+              <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#subscriptionModal{{ subscription.pk }}">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-success" onclick="window.location.href='{% url 'dashboard:update_subscription' subscription.pk %}'">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteSubscriptionModal{{ subscription.pk }}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+    
+          <!-- Subscription Detail Modal -->
+          <div class="modal fade" id="subscriptionModal{{ subscription.pk }}" tabindex="-1" aria-labelledby="subscriptionModalLabel{{ subscription.pk }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="subscriptionModalLabel{{ subscription.pk }}">Subscription Details</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <p>Name: {{ subscription.name }}</p>
+                  <p>Price: {{ subscription.price }}</p>
+                  <p>Pickup: {{ subscription.pickup }}</p>
+                  <p>Validity: {{ subscription.validity }}</p>
+                  <p>Weight: {{ subscription.weight }}</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <a href="{% url 'dashboard:update_subscription' subscription.pk %}" class="btn btn-primary">Edit</a>
+                  <a href="{% url 'dashboard:delete_subscription' subscription.pk %}" class="btn btn-danger">Delete</a>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <!-- Subscription Confirmation Delete Modal-->
+          <div class="modal fade" id="deleteSubscriptionModal{{ subscription.pk }}" tabindex="-1" aria-labelledby="deleteSubscriptionModalLabel{{ subscription.pk }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="deleteSubscriptionModalLabel{{ subscription.pk }}">Delete Subscription</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <p>Are you sure you want to delete the subscription: <strong>{{ subscription.name }}</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <a href="{% url 'dashboard:delete_subscription' subscription.pk %}" class="btn btn-danger">Delete</a>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+
+
+
+
   </div>
 
  

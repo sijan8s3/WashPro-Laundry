@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from .forms import OrderForm, OrderClothForm, OrderClothFormSet, ClothForm, ClothCategoryForm
-from base.models import Order, Clothes, CollectionCenter, Cloth_Category, OrderItem
+from .forms import OrderForm, OrderClothForm, OrderClothFormSet, ClothForm, ClothCategoryForm, SubscriptionForm
+from base.models import Order, Clothes, CollectionCenter, Cloth_Category, OrderItem, Subscription
 from django.contrib import messages
 from accounts.models import CustomUser
 from django.forms import formset_factory
@@ -31,12 +31,14 @@ def home(request):
     users = CustomUser.objects.all()
     clothes = Clothes.objects.all()
     cloth_categories = Cloth_Category.objects.all()
+    subscriptions = Subscription.objects.all()
     context= { 
         'orders': orders,
         'collection_centers': collection_centers,
         'users': users,
         'clothes': clothes,
-        'cloth_categories': cloth_categories
+        'cloth_categories': cloth_categories,
+        'subscriptions': subscriptions
     }
     return render(request=request, template_name='dashboard/home.html', context=context)
 
@@ -86,12 +88,6 @@ def create_order(request):
     }
 
     return render(request, 'dashboard/create_order.html', context)
-
-
-
-def order_detail(request, order_id):
-    order = Order.objects.get(pk=order_id)
-    return render(request, 'dashboard/order_detail.html', {'order': order})
 
 
 
@@ -203,5 +199,49 @@ def create_category(request, category_id=None):
         'category': category,
     }
     return render(request, 'dashboard/create_category.html', context)
+
+
+
+def create_subscription(request, subscription_id=None):
+    if subscription_id:
+        subscription = get_object_or_404(Subscription, id=subscription_id)
+    else:
+        subscription = None
+
+    if request.method == 'POST':
+        form = SubscriptionForm(request.POST, instance=subscription)
+        if form.is_valid():
+            form.save()
+            redirect_url = reverse('dashboard:home') + '#subscriptions'
+            return HttpResponseRedirect(redirect_url)
+    else:
+        form = SubscriptionForm(instance=subscription)
+
+    context = {
+        'form': form,
+        'subscription': subscription,
+    }
+    return render(request, 'dashboard/create_subscription.html', context)
+
+
+@login_required
+#@user_passes_test(is_admin)
+def delete_subscription(request, subscription_id):
+    # Delete the cloth category object
+    subs = Subscription.objects.get(pk=subscription_id)
+    subs.delete()
+    redirect_url = reverse('dashboard:home') + '#subscriptions'
+    return HttpResponseRedirect(redirect_url)
+
+
+def order_details(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order_total = sum(item.cloth.offer_price * item.quantity for item in order.orderitem_set.all())
+    
+    context = {
+        'order': order,
+        'order_total': order_total,
+    }
+    return render(request, 'dashboard/order_details.html', context)
 
 
