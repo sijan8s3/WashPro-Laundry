@@ -1,0 +1,93 @@
+/* Add custom styles for the admin dashboard */
+
+/* Sidebar */
+.sidebar {
+  background-color: #d61616;
+  color: #fff;
+}
+
+.sidebar .nav-link {
+  color: #fff;
+}
+
+/* Content sections */
+.content-section {
+  display: none;
+}
+
+.content-section.active {
+  display: block;
+}
+
+/* User and Order Details */
+.user-details,
+.order-details,
+.center-details {
+  display: none;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.user-details p,
+.order-details p,
+.center-details p {
+  margin: 5px 0;
+}
+
+.user-header,
+.order-header,
+.center-header {
+  cursor: pointer;
+}
+
+/* Table styles */
+.table {
+  width: 100%;
+}
+
+.table thead th {
+  font-weight: bold;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.table .text-success {
+  color: #28a745;
+}
+
+.table .text-danger {
+  color: #dc3545;
+}
+
+/* Modal styles */
+.modal-dialog {
+  max-width: 600px;
+}
+
+.modal-content {
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-weight: bold;
+}
+
+.modal-footer {
+  justify-content: flex-end;
+}
+
+/* Button styles */
+.btn-primary,
+.btn-success,
+.btn-danger {
+  margin-right: 5px;
+}

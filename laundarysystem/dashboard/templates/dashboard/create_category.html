@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  {% if is_update %}
+    <h2>Edit Cloth Category</h2>
+  {% else %}
+    <h2>Create Cloth Category</h2>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input type="text" class="form-control" id="name" name="name" placeholder="Enter name" value="{{ category.name }}" required>
+    </div>
+    {% if is_update %}
+      <input type="hidden" name="category_id" value="{{ category.id }}">
+      <button type="submit" class="btn btn-primary">Update</button>
+    {% else %}
+      <button type="submit" class="btn btn-primary">Create</button>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}

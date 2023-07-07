@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import formset_factory
-from base.models import Order, OrderItem
+from base.models import Order, OrderItem, CollectionCenter, Clothes, Cloth_Category
+
 
 class OrderForm(forms.ModelForm):
     class Meta:
@@ -21,3 +22,26 @@ class OrderClothForm(forms.ModelForm):
         fields = ('cloth', 'quantity')
 
 OrderClothFormSet = formset_factory(OrderClothForm, extra=1)
+
+
+
+class CollectionCenterForm(forms.ModelForm):
+    class Meta:
+        model = CollectionCenter
+        fields = ['name', 'address', 'description', 'active', 'incharge']
+
+
+class ClothForm(forms.ModelForm):
+    class Meta:
+        model = Clothes
+        fields = ['name', 'category', 'reg_price', 'offer_price']
+
+
+class ClothCategoryForm(forms.ModelForm):
+    class Meta:
+        model = Cloth_Category
+        fields = ['name']
+
+
+
+
