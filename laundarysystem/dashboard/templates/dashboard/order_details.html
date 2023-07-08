@@ -104,7 +104,26 @@
   }
   
   
+  /* Dark red Cancelled animation  */
+  .danger {
+    color: darkred;
+  }
   
+  .beat-animation {
+    animation: beat 1s infinite;
+  }
+  
+  @keyframes beat {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
   
   
   
@@ -158,9 +177,31 @@
 
     <div class="order-actions mt-5">
       <div class="btn-group" role="group" aria-label="Order Actions">
-        <button type="button" class="btn btn-success">Mark as Completed</button>
+        {% if order.status != 'cancelled' %}
+        {% if order.status == 'pending' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=collected" class="btn btn-success">Mark as Collected</a>
+        {% endif %}
+        {% if order.status == 'collected' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=washing" class="btn btn-success">Start Washing</a>
+        {% endif %}
+        {% if order.status == 'washing' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=delivered_cc" class="btn btn-success">Deliver to Collection</a>
+        {% endif %}
+        {% if order.status == 'delivered_cc' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=delivery_ready" class="btn btn-success">Out for Delivery</a>
+        {% endif %}
+        {% if order.status == 'delivery_ready' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=delivered" class="btn btn-success">Mark as Delivered</a>
+        {% endif %}
         <div class="m-2"></div> <!-- Add space between the buttons -->
-        <button type="button" class="btn btn-danger">Cancel Order</button>
+        {% if order.status == 'pending' or order.status == 'collected' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=cancelled" class="btn btn-danger">Cancel Order</a>
+        {% endif %}
+        {% else %}
+
+        <h4 class="text-center danger beat-animation">Order cancelled</h4>
+
+        {% endif %}
       </div>
     </div>
   </div>
@@ -223,5 +264,14 @@
 </div>
 
 <!-- Add Bootstrap JS script -->
+
+<script>
+
+
+
+
+
+
+</script>
 
 {% endblock %}

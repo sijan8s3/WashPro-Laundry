@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from .forms import OrderForm, OrderClothForm, OrderClothFormSet, ClothForm, ClothCategoryForm, SubscriptionForm, OrderItemFormSet
-from base.models import Order, Clothes, CollectionCenter, Cloth_Category, OrderItem, Subscription
+from .forms import *
+from base.models import *
 from django.contrib import messages
 from accounts.models import CustomUser
 from django.forms import formset_factory
@@ -26,10 +26,16 @@ def is_admin(user):
 
 @login_required(login_url='account:login')
 def home(request):
-    orders = Order.objects.all()
-    collection_centers = CollectionCenter.objects.all()
-    users = CustomUser.objects.all()
-    clothes = Clothes.objects.all()
+    if request.user.user_type== 'admin':
+        orders = Order.objects.all()
+    elif request.user.user_type== 'collection_center':
+        collection_center = CollectionCenter.objects.get(incharge=request.user)
+        orders = Order.objects.filter(collection_center=collection_center)
+    else:
+        orders= None
+    collection_centers = CollectionCenter.objects.all() if request.user.user_type == 'admin' else None
+    users = CustomUser.objects.all()  if request.user.user_type == 'admin' else None
+    clothes = Clothes.objects.all() 
     cloth_categories = Cloth_Category.objects.all()
     subscriptions = Subscription.objects.all()
     context= { 
@@ -59,6 +65,7 @@ def create_order(request, order_id=None):
         if form.is_valid() and formset.is_valid():
             order = form.save()
             formset.instance = order
+
             formset.save()
             return redirect('dashboard:order_detail', order_id=order.id)
     else:
@@ -229,5 +236,18 @@ def order_details(request, order_id):
         'order_total': order_total,
     }
     return render(request, 'dashboard/order_details.html', context)
+
+
+
+def change_order_status(request, order_id):
+    status = request.GET.get('status')
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Update the order status based on the received status value
+    order.status = status
+    order.save()
+
+    # Redirect to the order detail page
+    return redirect('dashboard:order_details', order_id=order.id)
 
 
