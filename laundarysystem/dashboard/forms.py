@@ -47,7 +47,18 @@ class SubscriptionForm(forms.ModelForm):
     class Meta:
         model = Subscription
         fields = ['name', 'price', 'pickup', 'validity', 'weight']
+        
 
 
+from django.forms import inlineformset_factory
 
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['collection_center', 'pickup_location', 'pickup_date', 'status']
+        widgets = {
+            'status': forms.HiddenInput(attrs={'value': 'pending'}),
+        }
+
+OrderItemFormSet = inlineformset_factory(Order, OrderItem, fields=('cloth', 'quantity'), extra=1)
 

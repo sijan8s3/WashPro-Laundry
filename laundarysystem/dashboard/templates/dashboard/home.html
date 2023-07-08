@@ -140,7 +140,7 @@
         </thead>
         <tbody>
           {% for order in orders %}
-          <tr>
+          <tr onclick="window.location.href='{% url 'dashboard:order_details' order.pk %}'" >
             <td>{{ order.pk }}</td>
             <td>{{ order.user }}</td>
             <td>{{ order.collection_center }}</td>
@@ -159,6 +159,7 @@
               </button>
             </td>
           </tr>
+
           <div class="modal fade" id="orderModal{{ order.pk }}" tabindex="-1" aria-labelledby="orderModalLabel{{ order.pk }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
               <div class="modal-content">
@@ -176,6 +177,7 @@
                   <p>Status: {{ order.status }}</p>
                 </div>
                 <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'dashboard:order_details' order.pk %}'" > View Details</button>
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                   {% if user.user_type == 'admin' %}
                   <button type="button" class="btn btn-primary">Edit</button>

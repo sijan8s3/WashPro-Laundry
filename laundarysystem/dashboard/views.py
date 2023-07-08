@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from .forms import OrderForm, OrderClothForm, OrderClothFormSet, ClothForm, ClothCategoryForm, SubscriptionForm
+from .forms import OrderForm, OrderClothForm, OrderClothFormSet, ClothForm, ClothCategoryForm, SubscriptionForm, OrderItemFormSet
 from base.models import Order, Clothes, CollectionCenter, Cloth_Category, OrderItem, Subscription
 from django.contrib import messages
 from accounts.models import CustomUser
@@ -43,51 +43,37 @@ def home(request):
     return render(request=request, template_name='dashboard/home.html', context=context)
 
 
-def create_order(request):
-    if request.method == 'POST':
-        order_form = OrderForm(request.POST)
-        formset = OrderClothFormSet(request.POST)
 
-        if order_form.is_valid():
-            order = order_form.save(commit=False)
-            order.user = request.user
-            order.save()
-        else:
-            print(order_form.errors)
-
-        if formset.is_valid():
-            # Process the formset
-            print('nice')
-        else:
-            print(formset.errors)
-
-
-        if order_form.is_valid() and formset.is_valid():
-            order = order_form.save(commit=False)
-            order.user = request.user
-            order.save()
-
-            for form in formset:
-                cloth = form.cleaned_data['cloth']
-                quantity = form.cleaned_data['quantity']
-                OrderItem.objects.create(order=order, cloth=cloth, quantity=quantity)
-
-            messages.success(request, 'Order created successfully.')
-            return redirect('dashboard:order_detail', pk=order.pk)
-        else:
-            messages.error(request, 'Failed to create the order. Please check the form.')
-
-    else:
-        order_form = OrderForm()
-        formset = OrderClothFormSet()
+def create_order(request, order_id=None):
+    collection_centers = CollectionCenter.objects.all()
     clothes = Clothes.objects.all()
+
+    if order_id:
+        order = get_object_or_404(Order, id=order_id)
+    else:
+        order = None
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        formset = OrderItemFormSet(request.POST, instance=order, queryset=OrderItem.objects.none())
+        if form.is_valid() and formset.is_valid():
+            order = form.save()
+            formset.instance = order
+            formset.save()
+            return redirect('dashboard:order_detail', order_id=order.id)
+    else:
+        form = OrderForm(instance=order)
+        formset = OrderItemFormSet(instance=order, queryset=OrderItem.objects.none())
+
     context = {
-        'order_form': order_form,
+        'form': form,
         'formset': formset,
+        'order': order,
+        'collection_centers': collection_centers,
         'clothes': clothes,
     }
-
     return render(request, 'dashboard/create_order.html', context)
+
 
 
 

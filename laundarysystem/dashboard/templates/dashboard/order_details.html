@@ -26,6 +26,88 @@
   .order-items-total {
     margin-top: 30px;
   }
+
+
+  
+
+ 
+
+  .order-flow {
+    text-align: center;
+    margin: 20px;
+  }
+  
+  .order-icon {
+    font-size: 30px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #f8f8f8;
+    padding-top: 15px;
+    margin-bottom: 10px;
+    filter: grayscale(1);
+  }
+  
+  .order-status {
+    font-weight: bold;
+  }
+  
+  .current .order-icon {
+    filter: none;
+  }
+  
+  .current {
+    color: #28a745; /* Add your desired current status highlight color here */
+  }
+  
+  .completed .order-icon {
+    filter: grayscale(0.5);
+    opacity: 0.5;
+  }
+  
+  .completed {
+    color: #6c757d; /* Add your desired completed status color here */
+  }
+  
+  .order-lines {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    position: relative;
+  }
+  
+  .line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #ccc;
+    margin: 0 5px;
+  }
+  
+  .line.active {
+    background-color: #007bff; /* Add your desired active line color here */
+  }
+  
+  .line::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: #ccc;
+    border-radius: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .line.active::before {
+    background-color: #007bff; /* Add your desired active line dot color here */
+  }
+  
+  
+  
+  
+  
+  
 </style>
 
 <div class="container">
@@ -82,6 +164,62 @@
       </div>
     </div>
   </div>
+
+
+
+
+ 
+
+
+  <div class="order-flow">
+
+
+    <div class="row">
+      <div class="col text-center {% if order.status == 'pending' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-file-alt order-icon {% if order.status == 'pending' %}fa-beat{% endif %}" title="Order has been placed by the user and is awaiting processing"></i>
+        <p class="order-status">Pending</p>
+      </div>
+      <div class="col text-center {% if order.status == 'collected' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-truck order-icon {% if order.status == 'collected' %}fa-beat{% endif %}" title="Clothes have been collected from the user by the collection center"></i>
+        <p class="order-status">Collected</p>
+      </div>
+      <div class="col text-center {% if order.status == 'washing' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-tint order-icon {% if order.status == 'washing' %}fa-beat{% endif %}" title="Clothes are at the washing center, undergoing the cleaning process"></i>
+        <p class="order-status">Washing</p>
+      </div>
+      <div class="col text-center {% if order.status == 'delivered_cc' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-warehouse order-icon {% if order.status == 'delivered_cc' %}fa-beat{% endif %}" title="Clothes have been delivered back to the collection center"></i>
+        <p class="order-status">Delivered to Collection</p>
+      </div>
+      <div class="col text-center {% if order.status == 'delivery_ready' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-truck-loading order-icon {% if order.status == 'delivery_ready' %}fa-beat{% endif %}" title="Clothes are being delivered to the user's specified address"></i>
+        <p class="order-status">Out for Delivery</p>
+      </div>
+      <div class="col text-center {% if order.status == 'delivered' %}current{% endif %}">
+        <i class="fas fa-check-circle order-icon {% if order.status == 'delivered' %}fa-beat{% endif %}" title="Clothes have been successfully delivered to the user"></i>
+        <p class="order-status">Delivered</p>
+      </div>
+    </div>
+    
+    <div class="order-lines">
+      <div class="line {% if order.status == 'pending' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'collected' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'washing' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'delivered_cc' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'delivery_ready' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'delivered' %}active{% endif %}"></div>
+
+    </div>
+  </div>
+  
+  
+  
+  
+  
+  
+
+  
+
 </div>
 
 <!-- Add Bootstrap JS script -->
