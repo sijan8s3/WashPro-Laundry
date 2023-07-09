@@ -68,9 +68,27 @@ def create_order(request, order_id=None):
             order = form.save(commit=False)
             order.user = request.user
             order.save()
-            breakpoint()
-            # formset = OrderItemFormSet(instance=order, queryset=OrderItem.objects.none())
-            # if request.POST..ke
+
+            data = request.POST
+            cloth_items = []
+            for key, value in data.items():
+                if key.startswith('cloth_'):
+                    # form data get using _1 that's last things
+                    cloth_id = key.split('_')[1]
+                    # also the quantity with _cloth_id which is get from previous code
+                    quantity_key = f'quantity_{cloth_id}'
+                    quantity = data.get(quantity_key)
+                    cloth_items.append((key, value[0], quantity))
+
+            # Printing the cloth items and their quantities
+            for cloth_item in cloth_items:
+                # Create a new OrderItem instance
+                order_item = OrderItem(
+                    order=order,
+                    cloth_id=cloth_item[1],
+                    quantity=cloth_item[2]
+                )
+                order_item.save()
     else:
         form = OrderForm(instance=order)
  
