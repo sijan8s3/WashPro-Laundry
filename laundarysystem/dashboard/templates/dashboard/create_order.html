@@ -62,38 +62,43 @@
       <label for="pickup_date">Pickup Date:</label>
       <input type="date" class="form-control" id="pickup_date" name="pickup_date" required>
     </div>
+
+
+    <div class="order-items">
+      <h3>Add Clothes</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Select Cloth</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+          </tr>
+        </thead>
+        <tbody id="cloth-table-body">
+          <tr id="cloth-row-1">
+            <td>
+              <select class="form-control cloth-select" name="cloth_1" required>
+                <option value="">Select Cloth</option>
+                {% for cloth in clothes %}
+                <option value="{{ cloth.id }}" data-price="{{ cloth.offer_price }}">{{ cloth.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              <input type="number" class="form-control quantity-input" name="quantity_1" min="1" required>
+            </td>
+            <td class="total-price" id="total-price-1">$0.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <button type="button" class="btn btn-secondary" id="add-cloth-btn">Add Cloth</button>
+    </div>
+
+
     <button type="submit" class="btn btn-primary">Submit Order</button>
   </form>
 
-  <div class="order-items">
-    <h3>Add Clothes</h3>
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Select Cloth</th>
-          <th>Quantity</th>
-          <th>Total Price</th>
-        </tr>
-      </thead>
-      <tbody id="cloth-table-body">
-        <tr id="cloth-row-1">
-          <td>
-            <select class="form-control cloth-select" name="cloth_1" required>
-              <option value="">Select Cloth</option>
-              {% for cloth in clothes %}
-              <option value="{{ cloth.id }}" data-price="{{ cloth.offer_price }}">{{ cloth.name }}</option>
-              {% endfor %}
-            </select>
-          </td>
-          <td>
-            <input type="number" class="form-control quantity-input" name="quantity_1" min="1" required>
-          </td>
-          <td class="total-price" id="total-price-1">$0.00</td>
-        </tr>
-      </tbody>
-    </table>
-    <button type="button" class="btn btn-secondary" id="add-cloth-btn">Add Cloth</button>
-  </div>
+ 
 
   <div class="order-items-total">
     <h3>Order Amount: <span id="order-amount">$0.00</span></h3>

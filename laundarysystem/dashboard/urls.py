@@ -31,6 +31,8 @@ urlpatterns = [
     path('subscription/<int:subscription_id>/update/', views.create_subscription, name='update_subscription'),
     path('delete_subscription/<int:subscription_id>/', views.delete_subscription, name='delete_subscription'),
 
+    path('create-user/', views.create_or_update_user, name='create_user'),
+    path('update-user/<int:user_id>/', views.create_or_update_user, name='update_user'),
 
 
 ]

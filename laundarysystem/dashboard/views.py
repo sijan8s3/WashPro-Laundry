@@ -15,6 +15,8 @@ from accounts.models import CustomUser as User
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import user_passes_test
+from django.db import IntegrityError
+
 
 
 
@@ -53,28 +55,28 @@ def home(request):
 def create_order(request, order_id=None):
     collection_centers = CollectionCenter.objects.all()
     clothes = Clothes.objects.all()
-
+ 
     if order_id:
         order = get_object_or_404(Order, id=order_id)
     else:
         order = None
-
+ 
+    # breakpoint()
     if request.method == 'POST':
-        form = OrderForm(request.POST, instance=order)
-        formset = OrderItemFormSet(request.POST, instance=order, queryset=OrderItem.objects.none())
-        if form.is_valid() and formset.is_valid():
-            order = form.save()
-            formset.instance = order
-
-            formset.save()
-            return redirect('dashboard:order_detail', order_id=order.id)
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.user = request.user
+            order.save()
+            breakpoint()
+            # formset = OrderItemFormSet(instance=order, queryset=OrderItem.objects.none())
+            # if request.POST..ke
     else:
         form = OrderForm(instance=order)
-        formset = OrderItemFormSet(instance=order, queryset=OrderItem.objects.none())
-
+ 
     context = {
         'form': form,
-        'formset': formset,
+        'formset': "formset",
         'order': order,
         'collection_centers': collection_centers,
         'clothes': clothes,
@@ -249,5 +251,36 @@ def change_order_status(request, order_id):
 
     # Redirect to the order detail page
     return redirect('dashboard:order_details', order_id=order.id)
+
+
+
+def create_or_update_user(request, user_id=None):
+    user = get_object_or_404(CustomUser, id=user_id) if user_id else None
+
+    subscriptions = Subscription.objects.all()
+    account_status_choices = CustomUser.VERIFICATION_STATUS
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            try:
+                form.save()
+                if user_id:
+                    messages.success(request, 'User details updated successfully.')
+                else:
+                    messages.success(request, 'User created successfully.')
+                return redirect('account:user_account')
+            except IntegrityError:
+                messages.error(request, 'User with the same phone number already exists.')
+    else:
+        form = UserForm(instance=user)
+
+    context = {
+        'form': form,
+        'user': user,
+        'subscriptions': subscriptions,
+        'account_status_choices': account_status_choices,
+    }
+    return render(request, 'dashboard/create_user.html', context)
 
 

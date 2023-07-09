@@ -74,8 +74,9 @@ class Order(models.Model):
     
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    cloth = models.ForeignKey('Clothes', on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE,related_name=
+                              "order_item")
+    cloth = models.ManyToManyField(Clothes,related_name="cloth")
     quantity = models.PositiveIntegerField()
 
     def __str__(self):

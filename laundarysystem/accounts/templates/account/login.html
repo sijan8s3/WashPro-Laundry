@@ -8,10 +8,10 @@
             <form method="POST" action="{% url 'account:login' %}" class="needs-validation" novalidate>
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="text" class="form-control" id="email" name="username" placeholder="Enter your email" required>
+                    <label for="phone_number">Phone Number</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Enter your phone number" required>
                     <div class="invalid-feedback">
-                        Please enter a valid email.
+                        Please enter a valid phone number.
                     </div>
                 </div>
                 <div class="form-group">
@@ -69,12 +69,12 @@
             $('#loginFailedModal').modal('show');
         {% endif %}
 
-        $('#email').on('input', function() {
-            const emailInput = $(this);
-            const email = emailInput.val().trim();
+        $('#phone_number').on('input', function() {
+            const phoneNumberInput = $(this);
+            const phoneNumber = phoneNumberInput.val().trim();
             const passwordInput = $('#password');
 
-            if (email.length > 0) {
+            if (phoneNumber.length > 0) {
                 passwordInput.closest('.form-group').slideDown();
             } else {
                 passwordInput.closest('.form-group').slideUp();
