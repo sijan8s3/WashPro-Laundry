@@ -12,22 +12,22 @@
       <div class="sidebar">
         <ul class="nav flex-column bg-secondary">
           <li class="nav-item">
-            <a class="nav-link text-white" href="#users" onclick="showContent('users')">Users</a>
+            <a class="nav-link text-white" href="#users" onclick="showContent('users')"><i class="fas fa-users"></i> Users</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#orders" onclick="showContent('orders')">Orders</a>
+            <a class="nav-link text-white" href="#orders" onclick="showContent('orders')"><i class="fas fa-shopping-cart"></i> Orders</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#collection-centers" onclick="showContent('collection-centers')">Collection Centers</a>
+            <a class="nav-link text-white" href="#collection-centers" onclick="showContent('collection-centers')"><i class="fas fa-map-marker-alt"></i> Collection Centers</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#clothes" onclick="showContent('clothes')">Clothes</a>
+            <a class="nav-link text-white" href="#clothes" onclick="showContent('clothes')"><i class="fas fa-tshirt"></i> Clothes</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#cloth-categories" onclick="showContent('cloth-categories')">Cloth Categories</a>
+            <a class="nav-link text-white" href="#cloth-categories" onclick="showContent('cloth-categories')"><i class="fas fa-tags"></i> Cloth Categories</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#subscriptions" onclick="showContent('subscriptions')">Subscriptions</a>
+            <a class="nav-link text-white" href="#subscriptions" onclick="showContent('subscriptions')"><i class="fas fa-file-alt"></i> Subscriptions</a>
           </li>
         </ul>
       </div>
@@ -114,7 +114,7 @@
                     <p>Email: {{ user.email }}</p>
                     <p>Address: {{ user.address }}</p>
                     <p>Account: {{ user.get_account_status_display }}</p>
-                    <p>Type: {{ user.get_user_type_display }}</p>
+                    <p>Type: {{ user.get_account_status_display }}</p>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -146,11 +146,10 @@
           </tr>
         </thead>
         <tbody>
-          <!-- 
+         
+
+
           {% for order in orders %}
-          {% if request.user.user_type == 'collection_center'%}
-          {% if order.collection_center.incharge == request.user %}
-          -->
           <tr>
             <td onclick="window.location.href='{% url 'dashboard:order_details' order.pk %}'" >{{ order.pk }}</td>
             <td>{{ order.user.first_name }}</td>
@@ -199,8 +198,7 @@
               </div>
             </div>
           </div>
-          {% endif %}
-          {% endif %}
+         
 
           {% endfor %}
         </tbody>
