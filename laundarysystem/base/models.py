@@ -52,22 +52,31 @@ class CollectionCenter(models.Model):
         return self.name
 
 class Order(models.Model):
+    ORDER_STATUS = (
+        ('pending', 'Pending'),
+        ('collected', 'Collected'),
+        ('washing', 'Washing'),
+        ('delivered_cc', 'Delivered to Collection'),
+        ('delivery_ready', 'Out for Delivery'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     collection_center = models.ForeignKey(CollectionCenter, on_delete=models.CASCADE)
     pickup_location = models.CharField(max_length=200)
     pickup_date = models.DateField()
-    status = models.CharField(max_length=20, default='pending')
+    status = models.CharField(max_length=20, choices=ORDER_STATUS, default='pending')
     created = models.DateTimeField(auto_now_add=True)
     update= models.DateTimeField(auto_now=True)
-
 
     def __str__(self):
         return f"Order #{self.pk}"
     
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    cloth = models.ForeignKey('Clothes', on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE,related_name=
+                              "order_item")
+    cloth = models.ManyToManyField(Clothes,related_name="cloth")
     quantity = models.PositiveIntegerField()
 
     def __str__(self):

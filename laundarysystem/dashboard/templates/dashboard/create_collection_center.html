@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2>{% if collection_center.id %}Update{% else %}Create{% endif %} Collection Center</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input type="text" class="form-control" id="name" name="name" placeholder="Enter name" value="{{ collection_center.name }}" required>
+    </div>
+    <div class="form-group">
+      <label for="address">Address:</label>
+      <input type="text" class="form-control" id="address" name="address" placeholder="Enter address" value="{{ collection_center.address }}">
+    </div>
+    <div class="form-group">
+      <label for="description">Description:</label>
+      <input type="text" class="form-control" id="description" name="description" placeholder="Enter description" value="{{ collection_center.description }}">
+    </div>
+    <div class="form-group">
+      <label for="active">Active:</label>
+      <input type="checkbox" class="form-control" id="active" name="active" {% if collection_center.active %}checked{% endif %}>
+    </div>
+    <div class="form-group">
+      <label for="incharge">Incharge:</label>
+      <select class="form-control" id="incharge" name="incharge">
+        {% for user in users %}
+        <option value="{{ user.id }}" {% if collection_center.incharge == user %}selected{% endif %}>{{ user.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">{% if collection_center.id %}Update{% else %}Create{% endif %}</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+  .order-details {
+    margin-bottom: 30px;
+  }
+
+  .order-details p {
+    margin-bottom: 10px;
+  }
+
+  .order-items {
+    margin-bottom: 30px;
+  }
+
+  .order-items h2 {
+    margin-bottom: 10px;
+  }
+
+  .order-items table {
+    margin-bottom: 0;
+  }
+
+  .order-items-total {
+    margin-top: 30px;
+  }
+
+
+  
+
+ 
+
+  .order-flow {
+    text-align: center;
+    margin: 20px;
+  }
+  
+  .order-icon {
+    font-size: 30px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #f8f8f8;
+    padding-top: 15px;
+    margin-bottom: 10px;
+    filter: grayscale(1);
+  }
+  
+  .order-status {
+    font-weight: bold;
+  }
+  
+  .current .order-icon {
+    filter: none;
+  }
+  
+  .current {
+    color: #28a745; /* Add your desired current status highlight color here */
+  }
+  
+  .completed .order-icon {
+    filter: grayscale(0.5);
+    opacity: 0.5;
+  }
+  
+  .completed {
+    color: #6c757d; /* Add your desired completed status color here */
+  }
+  
+  .order-lines {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    position: relative;
+  }
+  
+  .line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #ccc;
+    margin: 0 5px;
+  }
+  
+  .line.active {
+    background-color: #007bff; /* Add your desired active line color here */
+  }
+  
+  .line::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: #ccc;
+    border-radius: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .line.active::before {
+    background-color: #007bff; /* Add your desired active line dot color here */
+  }
+  
+  
+  /* Dark red Cancelled animation  */
+  .danger {
+    color: darkred;
+  }
+  
+  .beat-animation {
+    animation: beat 1s infinite;
+  }
+  
+  @keyframes beat {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  
+  
+</style>
+
+<div class="container">
+  <div class="m-5">
+    <div class="order-details">
+      <h2>Order Details</h2>
+      <div class="order-details-content">
+        <p><strong>Order ID:</strong> {{ order.pk }}</p>
+        <p><strong>User:</strong> {{ order.user }}</p>
+        <p><strong>Collection Center:</strong> {{ order.collection_center }}</p>
+        <p><strong>Pickup Location:</strong> {{ order.pickup_location }}</p>
+        <p><strong>Pickup Date:</strong> {{ order.pickup_date }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+      </div>
+    </div>
+
+    <div class="order-items">
+      <h3>Order Items</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Cloth</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order_item in order.orderitem_set.all %}
+          <tr>
+            <td>{{ order_item.cloth }}</td>
+            <td>{{ order_item.quantity }}</td>
+            <td>{{ order_item.quantity|multiply:order_item.cloth.offer_price }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" class="text-right"><strong>Total Price:</strong></td>
+            <td>${{ order_total }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="order-items-total">
+      <h4>Total Price of the Order: ${{ order_total }}</h4>
+    </div>
+
+    <div class="order-actions mt-5">
+      <div class="btn-group" role="group" aria-label="Order Actions">
+        {% if order.status != 'cancelled' %}
+        {% if order.status == 'pending' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=collected" class="btn btn-success">Mark as Collected</a>
+        {% endif %}
+        {% if order.status == 'collected' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=washing" class="btn btn-success">Start Washing</a>
+        {% endif %}
+        {% if order.status == 'washing' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=delivered_cc" class="btn btn-success">Deliver to Collection</a>
+        {% endif %}
+        {% if order.status == 'delivered_cc' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=delivery_ready" class="btn btn-success">Out for Delivery</a>
+        {% endif %}
+        {% if order.status == 'delivery_ready' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=delivered" class="btn btn-success">Mark as Delivered</a>
+        {% endif %}
+        <div class="m-2"></div> <!-- Add space between the buttons -->
+        {% if order.status == 'pending' or order.status == 'collected' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=cancelled" class="btn btn-danger">Cancel Order</a>
+        {% endif %}
+        {% else %}
+
+        <h4 class="text-center danger beat-animation">Order cancelled</h4>
+
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+
+
+
+ 
+
+
+  <div class="order-flow">
+
+
+    <div class="row">
+      <div class="col text-center {% if order.status == 'pending' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-file-alt order-icon {% if order.status == 'pending' %}fa-beat{% endif %}" title="Order has been placed by the user and is awaiting processing"></i>
+        <p class="order-status">Pending</p>
+      </div>
+      <div class="col text-center {% if order.status == 'collected' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-truck order-icon {% if order.status == 'collected' %}fa-beat{% endif %}" title="Clothes have been collected from the user by the collection center"></i>
+        <p class="order-status">Collected</p>
+      </div>
+      <div class="col text-center {% if order.status == 'washing' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-tint order-icon {% if order.status == 'washing' %}fa-beat{% endif %}" title="Clothes are at the washing center, undergoing the cleaning process"></i>
+        <p class="order-status">Washing</p>
+      </div>
+      <div class="col text-center {% if order.status == 'delivered_cc' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-warehouse order-icon {% if order.status == 'delivered_cc' %}fa-beat{% endif %}" title="Clothes have been delivered back to the collection center"></i>
+        <p class="order-status">Delivered to Collection</p>
+      </div>
+      <div class="col text-center {% if order.status == 'delivery_ready' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-truck-loading order-icon {% if order.status == 'delivery_ready' %}fa-beat{% endif %}" title="Clothes are being delivered to the user's specified address"></i>
+        <p class="order-status">Out for Delivery</p>
+      </div>
+      <div class="col text-center {% if order.status == 'delivered' %}current{% endif %}">
+        <i class="fas fa-check-circle order-icon {% if order.status == 'delivered' %}fa-beat{% endif %}" title="Clothes have been successfully delivered to the user"></i>
+        <p class="order-status">Delivered</p>
+      </div>
+    </div>
+    
+    <div class="order-lines">
+      <div class="line {% if order.status == 'pending' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'collected' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'washing' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'delivered_cc' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'delivery_ready' %}active{% endif %}"></div>
+      <div class="line {% if order.status == 'delivered' %}active{% endif %}"></div>
+
+    </div>
+  </div>
+  
+  
+  
+  
+  
+  
+
+  
+
+</div>
+
+<!-- Add Bootstrap JS script -->
+
+<script>
+
+
+
+
+
+
+</script>
+
+{% endblock %}

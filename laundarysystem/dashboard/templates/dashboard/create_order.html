@@ -1,187 +1,167 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+  .order-form {
+    margin-bottom: 30px;
+  }
+
+  .order-form .form-group {
+    margin-bottom: 10px;
+  }
+
+  .order-items {
+    margin-bottom: 30px;
+  }
+
+  .order-items table {
+    margin-bottom: 0;
+  }
+
+  .order-items table th,
+  .order-items table td {
+    vertical-align: middle;
+  }
+
+  .order-items-total {
+    margin-top: 30px;
+  }
+
+  .alert {
+    margin-top: 10px;
+  }
+</style>
+
 <div class="container">
-  <div class="row justify-content-center mt-5">
-    <div class="col-lg-8">
-      <div class="card shadow">
-        <div class="card-body">
-          <h2 class="card-title">Create Order</h2>
-          {% if messages %}
-          <div class="alert alert-danger" role="alert">
-            {% for message in messages %}
-            {{ message }}
-            {% endfor %}
-          </div>
-          {% endif %}
-          <form method="post">
-            {% csrf_token %}
-
-            <div class="form-group">
-              <label for="collection_center">Collection Center</label>
-              {{ order_form.collection_center }}
-            </div>
-
-            <div class="form-group">
-              <label for="pickup_location">Pickup Location</label>
-              <input type="text" class="form-control" id="pickup_location" name="pickup_location" required>
-            </div>
-
-            <div class="form-group">
-              <label for="pickup_date">Pickup Date</label>
-              <input type="date" class="form-control" id="pickup_date" name="pickup_date" required>
-            </div>
-
-            <h4 class="mt-4">Clothes</h4>
-            <table class="table" id="cloth-table">
-              <thead>
-                <tr>
-                  <th>Cloth</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for form in order_cloth_form %}
-                <tr class="form-row">
-                  <td>
-                    <select name="{{ form.cloth.html_name }}" class="form-control cloth-select" required>
-                      {% for cloth in clothes %}
-                      <option value="{{ cloth.pk }}" data-price="{{ cloth.offer_price }}">{{ cloth.name }}</option>
-                      {% endfor %}
-                    </select>
-                  </td>
-                  <td>
-                    <input type="number" class="form-control quantity-input" name="{{ form.quantity.html_name }}"
-                      min="1" value="1" required>
-                  </td>
-                  <td class="subtotal"></td>
-                  <td class="text-center">
-                    <span class="remove-cloth" onclick="removeClothRow(this)"><i
-                        class="fas fa-times text-danger"></i></span>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-
-            <div class="text-right mb-4">
-              <button type="button" class="btn btn-primary" id="add-cloth-btn">Add Cloth</button>
-            </div>
-
-            <div class="form-group">
-              <label for="total_price">Total Price</label>
-              <span id="total_price"></span>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block">Create Order</button>
-          </form>
-        </div>
-      </div>
+  <h2>Create Order</h2>
+  <form method="post" class="order-form">
+    {% csrf_token %}
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+      {{ error }}
     </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success" role="alert">
+      {{ success }}
+    </div>
+    {% endif %}
+    <div class="form-group">
+      <label for="collection_center">Collection Center:</label>
+      <select class="form-control" id="collection_center" name="collection_center">
+        {% for center in collection_centers %}
+        <option value="{{ center.id }}">{{ center.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="pickup_location">Pickup Location:</label>
+      <input type="text" class="form-control" id="pickup_location" name="pickup_location" placeholder="Enter pickup location" required>
+    </div>
+    <div class="form-group">
+      <label for="pickup_date">Pickup Date:</label>
+      <input type="date" class="form-control" id="pickup_date" name="pickup_date" required>
+    </div>
+
+
+    <div class="order-items">
+      <h3>Add Clothes</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Select Cloth</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+          </tr>
+        </thead>
+        <tbody id="cloth-table-body">
+          <tr id="cloth-row-1">
+            <td>
+              <select class="form-control cloth-select" name="cloth_1" required>
+                <option value="">Select Cloth</option>
+                {% for cloth in clothes %}
+                <option value="{{ cloth.id }}" data-price="{{ cloth.offer_price }}">{{ cloth.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              <input type="number" class="form-control quantity-input" name="quantity_1" min="1" required>
+            </td>
+            <td class="total-price" id="total-price-1">$0.00</td>
+          </tr>
+        </tbody>
+      </table>
+      <button type="button" class="btn btn-secondary" id="add-cloth-btn">Add Cloth</button>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Submit Order</button>
+  </form>
+
+ 
+
+  <div class="order-items-total">
+    <h3>Order Amount: <span id="order-amount">$0.00</span></h3>
   </div>
 </div>
 
+<!-- Add JavaScript code to handle cloth selection and calculate total price -->
 <script>
-  var addButton = document.getElementById("add-cloth-btn");
-  var formset = document.getElementById("cloth-table");
-  var formCount = {{ order_cloth_form|length }};
+  document.addEventListener('DOMContentLoaded', function() {
+    const addClothButton = document.querySelector('#add-cloth-btn');
+    const clothTableBody = document.querySelector('#cloth-table-body');
+    let clothRowCounter = 1;
 
-  addButton.addEventListener("click", function () {
-    formCount++;
-
-    // Create a new table row
-    var tableRow = document.createElement("tr");
-    tableRow.className = "form-row";
-
-    // Create cell for cloth selection
-    var clothInputCell = document.createElement("td");
-    var clothInput = document.createElement("select");
-    clothInput.name = "order_cloth_form-" + formCount + "-cloth";
-    clothInput.className = "form-control cloth-select";
-    clothInput.innerHTML = '{{ cloth_choices }}';
-
-    // Add cloth options
-    {% for cloth in clothes %}
-    var option = document.createElement("option");
-    option.value = "{{ cloth.pk }}";
-    option.text = "{{ cloth.name }}";
-    option.setAttribute('data-price', "{{ cloth.offer_price }}");
-    clothInput.appendChild(option);
-    {% endfor %}
-
-    clothInputCell.appendChild(clothInput);
-
-    // Create cell for quantity input
-    var quantityInputCell = document.createElement("td");
-    var quantityInput = document.createElement("input");
-    quantityInput.type = "number";
-    quantityInput.className = "form-control quantity-input";
-    quantityInput.name = "order_cloth_form-" + formCount + "-quantity";
-    quantityInput.min = "1";
-    quantityInput.value = "1";
-    quantityInput.required = true;
-    quantityInputCell.appendChild(quantityInput);
-
-    // Create cell for price subtotal
-    var priceCell = document.createElement("td");
-    priceCell.className = "subtotal";
-
-    // Create cell for action (remove button)
-    var actionCell = document.createElement("td");
-    actionCell.className = "text-center";
-    var removeClothSpan = document.createElement("span");
-    removeClothSpan.className = "remove-cloth";
-    removeClothSpan.onclick = function () {
-      removeClothRow(this);
-    };
-    var removeClothIcon = document.createElement("i");
-    removeClothIcon.className = "fas fa-times text-danger";
-    removeClothSpan.appendChild(removeClothIcon);
-    actionCell.appendChild(removeClothSpan);
-
-    // Append cells to the table row
-    tableRow.appendChild(clothInputCell);
-    tableRow.appendChild(quantityInputCell);
-    tableRow.appendChild(priceCell);
-    tableRow.appendChild(actionCell);
-
-    // Append the table row to the table body
-    formset.querySelector("tbody").appendChild(tableRow);
-  });
-
-  function updatePrices() {
-    var total = 0;
-    var rows = formset.querySelectorAll(".form-row");
-
-    rows.forEach(function (row) {
-      var clothSelect = row.querySelector(".cloth-select");
-      var quantityInput = row.querySelector(".quantity-input");
-      var priceCell = row.querySelector(".subtotal");
-
-      var price = parseFloat(clothSelect.options[clothSelect.selectedIndex].getAttribute('data-price'));
-      var quantity = parseFloat(quantityInput.value);
-      var subtotal = price * quantity;
-
-      total += subtotal;
-      priceCell.textContent = subtotal.toFixed(2);
+    addClothButton.addEventListener('click', function() {
+      clothRowCounter++;
+      const newClothRow = `
+        <tr id="cloth-row-${clothRowCounter}">
+          <td>
+            <select class="form-control cloth-select" name="cloth_${clothRowCounter}" required>
+              <option value="">Select Cloth</option>
+              {% for cloth in clothes %}
+              <option value="{{ cloth.id }}" data-price="{{ cloth.offer_price }}">{{ cloth.name }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <input type="number" class="form-control quantity-input" name="quantity_${clothRowCounter}" min="1" required>
+          </td>
+          <td class="total-price" id="total-price-${clothRowCounter}">$0.00</td>
+        </tr>
+      `;
+      clothTableBody.insertAdjacentHTML('beforeend', newClothRow);
     });
 
-    document.getElementById("total_price").textContent = total.toFixed(2);
-  }
+    clothTableBody.addEventListener('input', function(event) {
+      if (event.target.classList.contains('quantity-input') || event.target.classList.contains('cloth-select')) {
+        const clothRow = event.target.closest('tr');
+        const quantityInput = clothRow.querySelector('.quantity-input');
+        const totalPriceCell = clothRow.querySelector('.total-price');
 
-  updatePrices();
+        const clothSelect = clothRow.querySelector('.cloth-select');
+        const selectedOption = clothSelect.options[clothSelect.selectedIndex];
+        const clothPrice = selectedOption.getAttribute('data-price');
+        const quantity = parseInt(quantityInput.value);
+        const totalPrice = (quantity * clothPrice).toFixed(2);
 
-  formset.addEventListener("change", updatePrices);
-  formset.addEventListener("input", updatePrices);
+        totalPriceCell.textContent = `$${totalPrice}`;
+        calculateOrderAmount();
+      }
+    });
 
-  function removeClothRow(element) {
-    // Find the parent row and remove it
-    var row = element.parentNode.parentNode;
-    row.parentNode.removeChild(row);
-    updatePrices();
-  }
+    function calculateOrderAmount() {
+      const totalPriceCells = document.querySelectorAll('.total-price');
+      let orderAmount = 0;
+
+      totalPriceCells.forEach(function(totalPriceCell) {
+        const totalPrice = parseFloat(totalPriceCell.textContent.substring(1));
+        orderAmount += totalPrice;
+      });
+
+      const orderAmountSpan = document.querySelector('#order-amount');
+      orderAmountSpan.textContent = `$${orderAmount.toFixed(2)}`;
+    }
+  });
 </script>
-
 {% endblock %}
