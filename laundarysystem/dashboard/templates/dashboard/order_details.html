@@ -154,7 +154,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for order_item in order.orderitem_set.all %}
+          {% for order_item in order.orderitem.all %}
           <tr>
             <td>{{ order_item.cloth }}</td>
             <td>{{ order_item.quantity }}</td>
@@ -178,7 +178,10 @@
     <div class="order-actions mt-5">
       <div class="btn-group" role="group" aria-label="Order Actions">
         {% if order.status != 'cancelled' %}
-        {% if order.status == 'pending' %}
+        {% if order.status == 'draft' %}
+        <a href="{% url 'dashboard:change_order_status' order.id %}?status=placed" class="btn btn-success">Confirm Order</a>
+        {% endif %}
+        {% if order.status == 'placed' %}
         <a href="{% url 'dashboard:change_order_status' order.id %}?status=collected" class="btn btn-success">Mark as Collected</a>
         {% endif %}
         {% if order.status == 'collected' %}
@@ -194,7 +197,7 @@
         <a href="{% url 'dashboard:change_order_status' order.id %}?status=delivered" class="btn btn-success">Mark as Delivered</a>
         {% endif %}
         <div class="m-2"></div> <!-- Add space between the buttons -->
-        {% if order.status == 'pending' or order.status == 'collected' %}
+        {% if order.status == 'draft' or order.status == 'placed' or order.status == 'collected' %}
         <a href="{% url 'dashboard:change_order_status' order.id %}?status=cancelled" class="btn btn-danger">Cancel Order</a>
         {% endif %}
         {% else %}
@@ -216,9 +219,9 @@
 
 
     <div class="row">
-      <div class="col text-center {% if order.status == 'pending' %}current{% else %}completed{% endif %}">
-        <i class="fas fa-file-alt order-icon {% if order.status == 'pending' %}fa-beat{% endif %}" title="Order has been placed by the user and is awaiting processing"></i>
-        <p class="order-status">Pending</p>
+      <div class="col text-center {% if order.status == 'placed' %}current{% else %}completed{% endif %}">
+        <i class="fas fa-file-alt order-icon {% if order.status == 'placed' %}fa-beat{% endif %}" title="Order has been placed by the user and is awaiting processing"></i>
+        <p class="order-status">Order Placed</p>
       </div>
       <div class="col text-center {% if order.status == 'collected' %}current{% else %}completed{% endif %}">
         <i class="fas fa-truck order-icon {% if order.status == 'collected' %}fa-beat{% endif %}" title="Clothes have been collected from the user by the collection center"></i>

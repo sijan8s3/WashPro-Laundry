@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cloth_Category, Clothes, Subscription, CollectionCenter, Order, OrderItem
+from .models import *
 from accounts.models import CustomUser
 
 # Register your models here.
@@ -11,4 +11,5 @@ admin.site.register(CollectionCenter)
 admin.site.register(CustomUser)
 admin.site.register(Order)
 admin.site.register(OrderItem)
+admin.site.register(Invoice)
 

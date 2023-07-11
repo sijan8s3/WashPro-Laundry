@@ -83,7 +83,7 @@ body {
   height: 120px;
 }
 
-.btn {
+.btn-danger {
   display: inline-block;
   background-color: #ff5a5f;
   color: #fff;
@@ -94,8 +94,23 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.btn:hover {
+.btn-success {
+  display: inline-block;
+  background-color: #0d6efd;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
   background-color: #f44336;
+}
+
+.btn-success:hover {
+  background-color: #0052cc;
 }
 
 /* Footer */

@@ -35,4 +35,7 @@ urlpatterns = [
     path('update-user/<int:user_id>/', views.create_or_update_user, name='update_user'),
 
 
+    path('invoice/<int:invoice_id>/', views.invoice_details, name='invoice_details'),
+
+
 ]

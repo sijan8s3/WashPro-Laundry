@@ -54,7 +54,8 @@ class CollectionCenter(models.Model):
 
 class Order(models.Model):
     ORDER_STATUS = (
-        ('pending', 'Pending'),
+        ('draft', 'Pending'),
+        ('placed', 'Order Placed'),
         ('collected', 'Collected'),
         ('washing', 'Washing'),
         ('delivered_cc', 'Delivered to Collection'),
@@ -79,10 +80,12 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name="order_item")
+        Order, on_delete=models.CASCADE, related_name="orderitem")
     cloth = models.ForeignKey(
         Clothes, on_delete=models.CASCADE, related_name="cloth")
     quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
+    total_price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
 
     def __str__(self):
         return f"{self.order} - {self.cloth}"
@@ -105,3 +108,6 @@ class Invoice(models.Model):
 
     def __str__(self):
         return self.invoice_number
+    
+
+

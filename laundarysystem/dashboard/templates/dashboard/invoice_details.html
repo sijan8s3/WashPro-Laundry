@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load custom_filters%}
+
+{% block content %}
+<style>
+  .invoice-details {
+    margin-bottom: 30px;
+  }
+
+  .invoice-details .invoice-header {
+    margin-bottom: 20px;
+  }
+
+  .invoice-details .invoice-info {
+    margin-bottom: 20px;
+  }
+
+  .invoice-details .invoice-info p {
+    margin: 5px 0;
+  }
+
+  .invoice-details .invoice-items {
+    margin-bottom: 20px;
+  }
+
+  .invoice-details .invoice-items table {
+    margin-bottom: 0;
+  }
+
+  .invoice-details .invoice-items table th,
+  .invoice-details .invoice-items table td {
+    vertical-align: middle;
+  }
+
+  .invoice-details .invoice-total {
+    margin-bottom: 20px;
+  }
+
+  .invoice-details .invoice-total h4 {
+    margin: 10px 0;
+  }
+</style>
+
+<div class="container">
+  <div class="invoice-details">
+    <div class="invoice-header">
+      <h2>Invoice</h2>
+      <p>Issuer: {{ invoice.issuer_name }}</p>
+      <p>Date: {{ invoice.issue_date }}</p>
+    </div>
+
+    <div class="invoice-info">
+      <p><strong>Invoice Number:</strong> {{ invoice.invoice_number }}</p>
+      <p><strong>Issue Date:</strong> {{ invoice.issue_date }}</p>
+      <p><strong>Due Date:</strong> {{ invoice.due_date }}</p>
+      <p><strong>Billing Name:</strong> {{ invoice.billing_name }}</p>
+      <p><strong>Billing Address:</strong> {{ invoice.billing_address }}</p>
+      <p><strong>Billing Contact:</strong> {{ invoice.billing_contact }}</p>
+      <p><strong>Payment Status:</strong> {{ invoice.payment_status }}</p>
+      <p><strong>Payment Method:</strong> {{ invoice.payment_method }}</p>
+      <p><strong>Notes:</strong> {{ invoice.notes }}</p>
+    </div>
+
+    <div class="invoice-items">
+      <h3>Invoice Items</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in invoice.order.orderitem.all %}
+          <tr>
+            <td>{{ item.cloth.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.cloth.offer_price }}</td>
+            <td>{{ item.quantity|multiply:item.cloth.offer_price|floatformat:"2" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="invoice-total">
+      <h4>Total Amount: {{ invoice.total_amount }}</h4>
+    </div>
+  </div>
+
+  <div class="company-info">
+    <p>Washpro Pvt Ltd.</p>
+    <p>Bharatpur, Nepal</p>
+  </div>
+</div>
+{% endblock %}

@@ -5,7 +5,6 @@ from django.contrib.auth import logout
 from .forms import *
 from base.models import *
 from django.contrib import messages
-from accounts.models import CustomUser
 from django.forms import formset_factory
 from django.urls import reverse_lazy
 from django.views.generic import UpdateView
@@ -16,6 +15,14 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import user_passes_test
 from django.db import IntegrityError
+
+from django.template.loader import render_to_string
+from datetime import date, timedelta
+from decimal import Decimal
+from django.contrib.auth import get_user_model
+from django.db.models import Max
+
+
 
 
 
@@ -51,6 +58,62 @@ def home(request):
     return render(request=request, template_name='dashboard/home.html', context=context)
 
 
+'''
+def create_order(request, order_id=None):
+    collection_centers = CollectionCenter.objects.all()
+    clothes = Clothes.objects.all()
+
+    if order_id:
+        order = get_object_or_404(Order, id=order_id)
+    else:
+        order = None
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.user = request.user
+            order.save()
+
+            # Delete existing order items if updating an order
+            if order_id:
+                OrderItem.objects.filter(order=order).delete()
+
+            data = request.POST
+            cloth_items = []
+            for key, value in data.items():
+                if key.startswith('cloth_'):
+                    cloth_id = key.split('_')[1]
+                    quantity_key = f'quantity_{cloth_id}'
+                    quantity = data.get(quantity_key)
+                    cloth_items.append((cloth_id, quantity))
+
+            for cloth_item in cloth_items:
+                order_item = OrderItem(
+                    order=order,
+                    cloth_id=cloth_item[0],
+                    quantity=cloth_item[1]
+                )
+                order_item.save()
+
+            # Redirect to order details page after successful submission
+            return redirect('dashboard:order_details', order_id=order.id)
+    else:
+        form = OrderForm(instance=order)
+
+    order_items = OrderItem.objects.filter(order=order) if order else []
+
+    context = {
+        'form': form,
+        'order': order,
+        'order_items': order_items,
+        'collection_centers': collection_centers,
+        'clothes': clothes,
+    }
+    return render(request, 'dashboard/create_order.html', context)
+
+'''
+
 
 def create_order(request, order_id=None):
     collection_centers = CollectionCenter.objects.all()
@@ -83,10 +146,15 @@ def create_order(request, order_id=None):
             # Printing the cloth items and their quantities
             for cloth_item in cloth_items:
                 # Create a new OrderItem instance
+                cloth=  Clothes.objects.get(pk=cloth_item[1])
+                cloth_quantity=Decimal(cloth_item[2])
                 order_item = OrderItem(
-                    order=order,
+                    order=order, 
                     cloth_id=cloth_item[1],
-                    quantity=cloth_item[2]
+                    quantity=cloth_item[2],
+                    unit_price=cloth.offer_price,
+                    total_price=cloth.offer_price*cloth_quantity
+
                 )
                 order_item.save()
     else:
@@ -100,8 +168,6 @@ def create_order(request, order_id=None):
         'clothes': clothes,
     }
     return render(request, 'dashboard/create_order.html', context)
-
-
 
 
 def create_collection_center(request, collection_center_id=None):
@@ -249,8 +315,7 @@ def delete_subscription(request, subscription_id):
 
 def order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    order_total = sum(item.cloth.offer_price * item.quantity for item in order.orderitem_set.all())
-    
+    order_total = sum(item.cloth.offer_price * item.quantity for item in order.orderitem.all())
     context = {
         'order': order,
         'order_total': order_total,
@@ -259,16 +324,61 @@ def order_details(request, order_id):
 
 
 
+
 def change_order_status(request, order_id):
     status = request.GET.get('status')
     order = get_object_or_404(Order, id=order_id)
-    
+
     # Update the order status based on the received status value
     order.status = status
     order.save()
 
-    # Redirect to the order detail page
-    return redirect('dashboard:order_details', order_id=order.id)
+    if status == 'placed':
+        # Check if an invoice already exists for the order
+        existing_invoice = Invoice.objects.filter(order=order).first()
+        User = get_user_model()
+        user = User.objects.get(id=request.user.id)
+        #user = User().objects.get(id=order.user_id)
+
+        if existing_invoice:
+            # Update the existing invoice
+            existing_invoice.issue_date = date.today()
+            existing_invoice.due_date = date.today() + timedelta(days=7)
+            existing_invoice.total_amount = calculate_total_amount(order) 
+            existing_invoice.save()
+            invoice = existing_invoice
+        else:
+            # Generate the invoice
+            max_invoice_number = Invoice.objects.aggregate(max_invoice_number=Max('invoice_number'))['max_invoice_number']
+    
+            # Determine the next invoice number
+            if max_invoice_number:
+                next_invoice_number = int(max_invoice_number[3:]) + 1
+            else:
+                next_invoice_number = 1
+            
+            # Format the invoice number with leading zeros
+            invoice_number = f"INV{next_invoice_number:04}"
+            
+            invoice = Invoice.objects.create(
+                order=order,
+                invoice_number=invoice_number,
+                issue_date=date.today(),
+                due_date=date.today() + timedelta(days=7),
+                total_amount=calculate_total_amount(order),
+                payment_status='Pending',  # Initial payment status
+                payment_method='',  # Set as per your implementation
+                billing_name=f"{user.first_name} {user.last_name}",  # Set as per your implementation
+                billing_address=order.pickup_location,  # Set as per your implementation
+                billing_contact= user.phone_number,  # Set as per your implementation
+                notes='',  # Set as per your implementation
+            )
+
+        # Redirect to the invoice detail page
+        return redirect('dashboard:invoice_details', invoice_id=invoice.id)
+    else:
+        # Redirect to the order detail page
+        return redirect('dashboard:order_details', order_id=order.id)
 
 
 
@@ -300,5 +410,22 @@ def create_or_update_user(request, user_id=None):
         'account_status_choices': account_status_choices,
     }
     return render(request, 'dashboard/create_user.html', context)
+
+
+def calculate_total_amount(order):
+    total_amount = 0
+    order_items = OrderItem.objects.filter(order=order)
+    for order_item in order_items:
+        total_amount += order_item.total_price
+    return total_amount
+
+
+def invoice_details(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+
+    context = {
+        'invoice': invoice
+    }
+    return render(request, 'dashboard/invoice_details.html', context)
 
 
