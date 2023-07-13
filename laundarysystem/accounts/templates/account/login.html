@@ -1,39 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container d-flex align-items-center justify-content-center vh-100">
-    <div class="card shadow-lg animated fadeInDown">
-        <h3 class="card-header text-center">Login to WashPro</h3>
-        <div class="card-body">
+<div class="flex items-center justify-center h-screen">
+    <div class="bg-white shadow-lg animate__animated animate__fadeInDown rounded-md p-6 w-80">
+        <h3 class="text-center text-lg font-semibold mb-4">Login to WashPro</h3>
+        <div class="space-y-4">
             <form method="POST" action="{% url 'account:login' %}" class="needs-validation" novalidate>
                 {% csrf_token %}
-                <div class="form-group">
-                    <label for="phone_number">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Enter your phone number" required>
-                    <div class="invalid-feedback">
+                <div class="form-group relative">
+                    <label for="phone_number" class="text-sm">Phone Number</label>
+                    <input type="text" class="form-input w-full h-12" id="phone_number" name="phone_number" placeholder="Enter your phone number" required>
+                    <div class="invalid-feedback absolute -bottom-6 left-0 text-xs text-red-500">
                         Please enter a valid phone number.
                     </div>
                 </div>
+                
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                    <label for="password" class="text-sm">Password</label>
+                    <div class="relative">
+                        <input type="password" class="form-input w-full h-12 pl-4 pr-10" id="password" name="password" placeholder="Enter your password" required>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <button class="text-gray-600 focus:outline-none" type="button" id="togglePassword">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
-                        <div class="invalid-feedback">
+                        <div class="invalid-feedback absolute -bottom-6 left-0 text-xs text-red-500">
                             Please enter your password.
                         </div>
                     </div>
                 </div>
-                <div class="form-group form-check">
-                    <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
-                    <label class="form-check-label" for="rememberMe">Remember me</label>
+                <br>
+                
+                <div class="form-group flex items-center">
+                    <input type="checkbox" class="form-checkbox" id="rememberMe" name="remember">
+                    <label class="ml-2" for="rememberMe">Remember me</label>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Login</button>
-                <a href="#" class="text-center d-block mt-3">Forgot password?</a>
+                
+                <button type="submit" class="bg-blue-500 text-white rounded-md px-4 py-2 w-full">Login</button>
+                <a href="#" class="text-center block mt-3">Forgot password?</a>
             </form>
         </div>
     </div>
@@ -62,7 +66,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.tailwindcss.com/2.2.19/tailwind.min.js"></script>
 <script>
     $(document).ready(function() {
         {% if messages %}
