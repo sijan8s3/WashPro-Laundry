@@ -41,6 +41,17 @@ class PickupRequest(models.Model):
     collection_center = models.ForeignKey(CollectionCenter, on_delete=models.SET_NULL, null=True)
     cloth_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     pickup_date = models.DateField()
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, blank=True)
+
+    STATUS_CHOICES = (
+        ('requested', 'Requested'),
+        ('collecting', 'Collecting'),
+        ('collected', 'Collected'),
+        ('order_created', 'Order Created'),
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='requested', null=True)
+
+
 
     def __str__(self):
         return f"Pickup Request by {self.user.first_name} on {self.pickup_date}"

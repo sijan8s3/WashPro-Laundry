@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container text-center">
+    <h2 class="mb-4">Pickup Request Submitted!!</h2>
+    <i class="fas fa-check-circle fa-5x text-success mb-4 animate__animated animate__bounceIn"></i>
+    <div class="card mx-auto" style="max-width: 400px;">
+      <div class="card-body">
+        <h5 class="card-title">Pickup Details</h5>
+        <p class="card-text">Your pickup request has been successfully submitted. Please wait for the call from the collection center.</p>
+      </div>
+    </div>
+    <a href="{% url 'dashboard:home' %}" class="btn btn-primary mt-4">Go Back to Dashboard</a>
+  </div>
+{% endblock %}

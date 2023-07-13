@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from subscription.models import UserSubscription
 from .forms import *
 from django.contrib.auth.decorators import login_required
@@ -28,3 +28,12 @@ def create_pickup_request(request):
         form = PickupRequestForm()
     
     return render(request, 'subscription/create_pickup_request.html', {'user_subscription': user_subscription, 'form': form, 'collection_centers': collection_centers})
+
+
+def pickup_request_success(request):
+    return render(request, 'subscription/pickup_request_success.html')
+
+
+
+
+

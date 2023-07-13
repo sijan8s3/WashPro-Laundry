@@ -63,6 +63,11 @@ class Order(models.Model):
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
     )
+    ORDER_TYPES = (
+        ('walk-in', 'Walk-in'),
+        ('subscription', 'Subscription'),
+    )
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
     collection_center = models.ForeignKey(
@@ -73,6 +78,8 @@ class Order(models.Model):
         max_length=20, choices=ORDER_STATUS, default='pending')
     created = models.DateTimeField(auto_now_add=True)
     update = models.DateTimeField(auto_now=True)
+    order_type = models.CharField(max_length=20, choices=ORDER_TYPES, null=True, default='walk-in')
+
 
     def __str__(self):
         return f"Order #{self.pk}"
