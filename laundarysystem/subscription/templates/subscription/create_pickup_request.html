@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2>Create Pickup Request</h2>
+  {% if user_subscription.has_expired %}
+    <div class="alert alert-danger" role="alert">
+      Your subscription has expired. Please renew your subscription to continue using our services.
+      <button type="button" class="btn btn-primary">Renew Subscription</button>
+    </div>
+    <form id="pickup-request-form" class="disabled">
+  {% else %}
+    <form id="pickup-request-form" method="post">
+      {% csrf_token %}
+      <!-- Pickup Location -->
+      <div class="form-group">
+        <label for="pickup-location">Pickup Location:</label>
+        <input type="text" class="form-control" id="pickup-location" name="pickup_location" required>
+      </div>
+
+      <!-- Collection Center -->
+      <div class="form-group">
+        <label for="collection-center">Collection Center:</label>
+        <select class="form-control" id="collection-center" name="collection_center" required>
+          <option value="" selected disabled>Select Collection Center</option>
+          {% for center in collection_centers %}
+            <option value="{{ center.id }}">{{ center.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Pickup Date -->
+      <div class="form-group">
+        <label for="pickup-date">Pickup Date:</label>
+        <input type="date" class="form-control" id="pickup-date" name="pickup_date" required>
+      </div>
+
+      <!-- Create Pickup Request Button -->
+      <button type="submit" class="btn btn-primary">Create Pickup Request</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

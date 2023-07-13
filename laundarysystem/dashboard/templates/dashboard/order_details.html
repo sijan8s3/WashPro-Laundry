@@ -205,8 +205,20 @@
         <h4 class="text-center danger beat-animation">Order cancelled</h4>
 
         {% endif %}
+
+
       </div>
+
     </div>
+
+    {% if order.status != 'cancelled' and order.status != 'draft'%}
+      
+    {% if invoice.payment_status == 'Pending' %}
+    <a href="{% url 'dashboard:pay_invoice' invoice_id=invoice.id %}" class="btn btn-success mt-5">Proceed to Payment</a>
+{% endif %}
+{% endif %}
+
+
   </div>
 
 

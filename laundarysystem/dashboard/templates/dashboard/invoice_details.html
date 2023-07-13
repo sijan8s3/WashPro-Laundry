@@ -90,9 +90,25 @@
     </div>
   </div>
 
+  {{ invoice.payment_status }}
+
   <div class="company-info">
     <p>Washpro Pvt Ltd.</p>
     <p>Bharatpur, Nepal</p>
   </div>
 </div>
+
+
+
+<div class="invoice-summary">
+  <p class="text-right">Total Amount: {{ invoice.total_amount }}</p>
+  <p class="text-right">Payment Status: {{ invoice.payment_status }}</p>
+</div>
+
+{% if invoice.payment_status == 'Pending' %}
+<div class="proceed-to-pay">
+  <a href="{% url 'dashboard:pay_invoice' invoice_id=invoice.id %}" class="btn btn-primary">Proceed to Pay</a>
+</div>
+{% endif %}
+
 {% endblock %}

@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
@@ -21,6 +21,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.db.models import Max
+from django.core.mail import send_mail
 
 
 
@@ -316,9 +317,12 @@ def delete_subscription(request, subscription_id):
 def order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     order_total = sum(item.cloth.offer_price * item.quantity for item in order.orderitem.all())
+    invoice = Invoice.objects.filter(order=order).first()
+
     context = {
         'order': order,
         'order_total': order_total,
+        'invoice': invoice,
     }
     return render(request, 'dashboard/order_details.html', context)
 
@@ -428,4 +432,32 @@ def invoice_details(request, invoice_id):
     }
     return render(request, 'dashboard/invoice_details.html', context)
 
+
+def pay_invoice(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    
+    # Check if the invoice is already paid
+    if invoice.payment_status == 'Paid':
+        return HttpResponse('This invoice is already paid.')
+    
+    # Process the payment logic here
+    # ...
+
+    # Update the invoice payment status
+    invoice.payment_status = 'Paid'
+    invoice.save()
+
+    # Redirect to a success page or display a success message
+    return HttpResponse('Payment successful. Thank you!')
+
+
+
+def send_email(subject, message, to_email):
+    send_mail(
+        subject,
+        message,
+        'admin@email.com',
+        [to_email],
+        fail_silently=False,
+        )
 

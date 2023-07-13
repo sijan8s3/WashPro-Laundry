@@ -113,6 +113,10 @@ body {
   background-color: #0052cc;
 }
 
+.btn-green {
+  background-color: #00cc00;
+}
+
 /* Footer */
 .footer {
   background-color: #333;
