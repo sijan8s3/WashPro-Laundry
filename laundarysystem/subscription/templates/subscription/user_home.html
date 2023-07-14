@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Welcome, {{ user.first_name }} {{ user.last_name }}</h2>
+
+  <!-- Request Pickup Button -->
+  <div class="text-center">
+    {% if user_subscription.remaining_pickups > 0 %}
+      <a href="{% url 'subscription:create_pickup_request' %}" class="btn btn-primary">Request Pickup</a>
+    {% else %}
+      <a href="#" class="btn btn-primary disabled">Request Pickup (Limit Reached)</a>
+    {% endif %}
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+        <a href="{% url 'subscription:pickup_request_detail' pickup_request_id=last_pickup.id %}">
+      <div class="card">
+        <div class="card-header">
+          <h3>Last Order</h3>
+        </div>
+        <div class="card-body">
+          {% if last_order %}
+            <p>Status: {{ last_order.get_status_display }}</p>
+            <p>Order ID: {{ last_order.id }}</p>
+            <p>Date: {{ last_order.created }}</p>
+            <p>Collection Center: {{ last_order.collection_center }}</p>
+            <!-- Add other order details here -->
+          {% else %}
+            <p>No orders found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    </div>
+
+    <div class="col-md-6">
+        <a href="{% url 'dashboard:order_details' order_id=last_order.id %}">
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Last Pickup</h3>
+        </div>
+        <div class="card-body">
+          {% if last_pickup %}
+            <p>Status: {{ last_pickup.get_status_display }}</p>
+            <p>Pickup ID: {{ last_pickup.id }}</p>
+            <p>Date: {{ last_pickup.created }}</p>
+            <p>Collection Center: {{ last_pickup.collection_center }}</p>
+            <p>Pickup Location: {{ last_pickup.pickup_location }}</p>
+            <p>Cloth Weight: {{ last_pickup.cloth_weight }}</p>
+            <!-- Add other pickup details here -->
+          {% else %}
+            <p>No pickups found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+
+    </div>
+  </div>
+
+  <!-- Current Subscription Details -->
+  <h3>Current Subscription Details</h3>
+  {% if user_subscription %}
+    <p>Remaining Pickups: {{ user_subscription.remaining_pickups }}</p>
+    <p>Remaining Weight: {{ user_subscription.remaining_cloth_weight }}</p>
+    <p>Subscription Start Date: {{ user_subscription.start_date }}</p>
+    <p>Subscription End Date: {{ user_subscription.end_date }}</p>
+    {% if user_subscription.has_expired %}
+      <div class="alert alert-danger" role="alert">
+        Your subscription has expired. Please renew your subscription to continue using our services.
+        <a href="{% url 'subscription:renew_subscription' %}" class="btn btn-primary">Renew Subscription</a>
+      </div>
+    {% endif %}
+  {% else %}
+    <p>No active subscription.</p>
+  {% endif %}
+</div>
+{% endblock %}

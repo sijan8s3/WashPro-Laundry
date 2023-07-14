@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2>Pickup Request Detail</h2>
+
+  {% if message %}
+    <div class="alert alert-success" role="alert">
+      {{ message }}
+    </div>
+    {% endif %}
+
+  <table class="table">
+    <tbody>
+      <tr>
+        <th>User:</th>
+        <td>{{ pickup_request.user.get_full_name }}</td>
+      </tr>
+      <tr>
+        <th>First Name:</th>
+        <td>{{ pickup_request.user.first_name }}</td>
+      </tr>
+      <tr>
+        <th>Last Name:</th>
+        <td>{{ pickup_request.user.last_name }}</td>
+      </tr>
+      <tr>
+        <th>Phone Number:</th>
+        <td>{{ pickup_request.user.phone_number }}</td>
+      </tr>
+      <tr>
+        <th>Collection Center:</th>
+        <td>{{ pickup_request.collection_center }}</td>
+      </tr>
+      <tr>
+        <th>Pickup Location:</th>
+        <td>{{ pickup_request.pickup_location }}</td>
+      </tr>
+      <tr>
+        <th>Pickup Date:</th>
+        <td>{{ pickup_request.pickup_date }}</td>
+      </tr>
+      <tr>
+        <th>Cloth Weight(Kg):</th>
+        <td>{{ pickup_request.cloth_weight }}</td>
+      </tr>
+      <tr>
+        <th>Status:</th>
+        <td>{{ pickup_request.get_status_display }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+    <!-- Cloth Weight Form -->
+    {% if pickup_request.status == 'collected' %}
+    <form id="cloth-weight-form" action="{% url 'subscription:update_cloth_weight' pickup_request.id %}" method="POST">
+      {% csrf_token %}
+      <!-- Cloth Weight input field -->
+      <div class="form-group">
+        <label for="cloth-weight">Cloth Weight(KG):</label>
+        <input type="number" step="0.1" class="form-control" id="cloth-weight" name="cloth_weight" min='0.1' required>
+      </div>
+      <!-- Submit button for updating cloth weight -->
+      <button type="submit" class="btn btn-primary">Update Cloth Weight</button>
+    </form>
+    {% endif %}
+
+
+  <!-- Action buttons -->
+  <div class="text-center">
+    {% if pickup_request.status != 'cancelled' %} 
+    {% if pickup_request.status == 'requested' %}
+      <form action="{% url 'subscription:update_pickup_request_status' pickup_request.id %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="collecting">
+        <button type="submit" class="btn btn-primary">Mark as Collecting</button>
+      </form>
+    {% endif %}
+    {% if pickup_request.status == 'collecting' %}
+      <form action="{% url 'subscription:update_pickup_request_status' pickup_request.id %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="collected">
+        <button type="submit" class="btn btn-primary">Mark as Collected</button>
+      </form>
+    {% endif %}
+    <!-- {% if pickup_request.status == 'collected' %}
+      <form action="{% url 'subscription:update_pickup_request_status' pickup_request.id %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="order_created">
+        <button type="submit" class="btn btn-primary">View Order</button>
+      </form>
+    {% endif %}
+    -->
+
+    <div class="text-center">
+      {% if pickup_request.status == 'order_created' %}
+        <a href="{% url 'dashboard:order_details' order_id=pickup_request.order.id %}" class="btn btn-primary">View Order</a>
+      {% endif %}
+
+    {% endif %}
+
+    {% if pickup_request.status == 'requested' or pickup_request.status == 'collecting' %}
+      <form action="{% url 'subscription:update_pickup_request_status' pickup_request.id %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="cancelled">
+        <button type="submit" class="btn btn-danger">Cancel</button>
+      </form>
+    {% endif %}
+  </div>
+
+
+</div>
+
+{% endblock %}
