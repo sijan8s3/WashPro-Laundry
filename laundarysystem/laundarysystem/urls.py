@@ -7,6 +7,8 @@ urlpatterns = [
     path('accounts/', include('accounts.urls', namespace='account')),
     path('dashboard/', include('dashboard.urls', namespace='dashboard')),
     path('subscription/', include('subscription.urls', namespace='subscription')),
+    path('khalti/', include('khalti.urls')),
+
 
 
 ]

@@ -12,5 +12,10 @@ urlpatterns = [
 
     path('user_home/', views.user_home, name='user_home'),
 
+    path('subscriptions/', views.subscription_list, name='subscription_list'),
+    path('subscribe/<int:subscription_id>/', views.subscribe, name='subscribe'),
+    path('success/', views.subscription_success, name='subscription_success'),
+
+
 
 ]

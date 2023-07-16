@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from subscription.models import UserSubscription
+from subscription.models import UserSubscription, Subscription
 from .forms import *
 from django.contrib.auth.decorators import login_required
 from base.models import CollectionCenter, Order
 from django.contrib import messages
 from django.http import HttpResponseBadRequest
 from django.urls import reverse
+from datetime import datetime, timedelta, timezone
+from django.views.decorators.http import require_POST
+#from khalti.checkout import Checkout
+#from khalti.utils import sanitize_mobile
+import uuid
 
 
 
@@ -24,6 +29,10 @@ def create_pickup_request(request):
             # Create the pickup request object
             pickup_request = form.save(commit=False)
             pickup_request.user = user
+            if user.user_type == 'collection_center':
+                pickup_request.pickup_type = 'dropped'
+            else:
+                pickup_request.pickup_type = 'collected'
             pickup_request.save()
         
             
@@ -114,3 +123,71 @@ def user_home(request):
         'last_pickup': last_pickup,
         'last_order': last_order
     })
+
+
+def subscription_list(request):
+    subscriptions = Subscription.objects.all()
+    return render(request, 'subscription/subscription_list.html', {'subscriptions': subscriptions})
+
+
+'''
+@login_required
+def subscribe(request, subscription_id):
+    subscription = get_object_or_404(Subscription, id=subscription_id)
+    user = request.user
+    start_date = datetime.now().date()
+    end_date = start_date + timedelta(days=subscription.validity)
+
+    try:
+        user_subscription = UserSubscription.objects.get(user=user)
+        user_subscription.subscription_plan = subscription
+        user_subscription.start_date = start_date
+        user_subscription.end_date = end_date
+        user_subscription.save()
+        
+    except UserSubscription.DoesNotExist:
+        user_subscription = UserSubscription.objects.create(
+            user=user,
+            subscription_plan=subscription,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+    return render(request, 'subscription/subscription_success.html')
+    
+'''
+
+
+def subscribe(request, subscription_id):
+    # Retrieve the subscription object based on the subscription_id
+    subscription = get_object_or_404(Subscription, id=subscription_id)
+
+    # Generate a unique transaction ID for the payment
+    transaction_id = generate_transaction_id()  # Implement your own logic to generate a transaction ID
+
+    # Create a Checkout instance with your Khalti credentials
+    checkout = Checkout(
+        public_key='YOUR_PUBLIC_KEY',  # Replace with your Khalti public key
+        private_key='YOUR_PRIVATE_KEY',  # Replace with your Khalti private key
+        product_identity=str(subscription.id),
+        product_name=subscription.name,
+        amount=subscription.price,
+        success_url='YOUR_SUCCESS_URL',  # Replace with your success URL
+        failure_url='YOUR_FAILURE_URL',  # Replace with your failure URL
+        transaction_id=transaction_id,
+    )
+
+    # Generate the Khalti payment URL
+    payment_url = checkout.initiate_payment()
+
+    # Render the template with the payment URL
+    return render(request, 'subscription/subscribe_payment.html', {'payment_url': payment_url})
+
+
+
+def subscription_success(request):
+    return render(request, 'subscription/subscription_success.html')
+
+def generate_transaction_id():
+    transaction_id = str(uuid.uuid4()).replace('-', '')
+    return transaction_id

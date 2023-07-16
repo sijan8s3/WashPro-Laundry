@@ -139,7 +139,8 @@
         <p><strong>Collection Center:</strong> {{ order.collection_center }}</p>
         <p><strong>Pickup Location:</strong> {{ order.pickup_location }}</p>
         <p><strong>Pickup Date:</strong> {{ order.pickup_date }}</p>
-        <p><strong>Status:</strong> {{ order.status }}</p>
+        <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+        <p><strong>Type:</strong> {{ order.get_order_type_display }}</p>
       </div>
     </div>
 

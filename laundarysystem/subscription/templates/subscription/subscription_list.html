@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2>Subscription List</h2>
+  <div class="row">
+    {% for subscription in subscriptions %}
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">{{ subscription.name }}</h5>
+          <p class="card-text">Price: ${{ subscription.price }}</p>
+          <p class="card-text">Pickup Count: {{ subscription.pickup }}</p>
+          <p class="card-text">Validity: {{ subscription.validity }} days</p>
+          <p class="card-text">Weight Limit: {{ subscription.weight }} kg</p>
+          <form action="{% url 'subscription:subscribe' subscription.id %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="subscription_id" value="{{ subscription.id }}">
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

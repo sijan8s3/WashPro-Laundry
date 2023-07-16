@@ -22,7 +22,7 @@ class UserSubscription(models.Model):
         end_date = self.end_date
     # Get the pickup requests within the subscription dates
         pickup_requests = self.user.pickuprequest_set.filter(
-            ~Q(status='cancelled'), pickup_date__range=(start_date, end_date)
+            ~Q(status='cancelled'), ~Q(pickup_type= 'dropped'), pickup_date__range=(start_date, end_date)
         )
         return self.subscription_plan.pickup - pickup_requests.count()
 
@@ -65,6 +65,12 @@ class PickupRequest(models.Model):
         ('cancelled', 'Cancelled'),
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='requested', null=True)
+    PICKUP_TYPES = (
+        ('dropped', 'Dropped By User'),
+        ('collected', 'Collected By Center'),
+    )
+    pickup_type = models.CharField(max_length=20, choices=PICKUP_TYPES, null=True, blank=True, default='collected')
+
 
 
 
