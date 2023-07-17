@@ -11,6 +11,8 @@ from django.views.decorators.http import require_POST
 #from khalti.checkout import Checkout
 #from khalti.utils import sanitize_mobile
 import uuid
+from django.core.paginator import Paginator
+
 
 
 
@@ -165,7 +167,8 @@ def subscribe(request, subscription_id):
     # Generate a unique transaction ID for the payment
     transaction_id = generate_transaction_id()  # Implement your own logic to generate a transaction ID
 
-    # Create a Checkout instance with your Khalti credentials
+    # Create a Checkout instance with your Khalti credentials\
+    '''
     checkout = Checkout(
         public_key='YOUR_PUBLIC_KEY',  # Replace with your Khalti public key
         private_key='YOUR_PRIVATE_KEY',  # Replace with your Khalti private key
@@ -182,6 +185,7 @@ def subscribe(request, subscription_id):
 
     # Render the template with the payment URL
     return render(request, 'subscription/subscribe_payment.html', {'payment_url': payment_url})
+    '''
 
 
 
@@ -191,3 +195,26 @@ def subscription_success(request):
 def generate_transaction_id():
     transaction_id = str(uuid.uuid4()).replace('-', '')
     return transaction_id
+
+
+def user_orders(request):
+    user = request.user
+    orders = Order.objects.filter(user=user)
+    
+    # Set the number of items per page
+    items_per_page = 10
+    
+    # Create a Paginator object
+    paginator = Paginator(orders, items_per_page)
+    
+    # Get the current page number from the request's GET parameters
+    page_number = request.GET.get('page')
+    
+    # Get the Page object for the current page
+    page = paginator.get_page(page_number)
+    
+    context = {
+        'orders': page,
+    }
+    return render(request, 'subscription/user_orders.html', context)
+

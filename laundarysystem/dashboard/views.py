@@ -22,6 +22,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.db.models import Max
 from django.core.mail import send_mail
+from django.core.paginator import Paginator
 
 
 
@@ -36,19 +37,49 @@ def is_admin(user):
 
 @login_required(login_url='account:login')
 def home(request):
-    if request.user.user_type== 'admin':
-        orders = Order.objects.all()
-    elif request.user.user_type== 'collection_center':
+    if request.user.user_type == 'admin':
+        order_list = Order.objects.all()
+        collection_center_list = CollectionCenter.objects.all()
+        user_list = CustomUser.objects.all()
+    elif request.user.user_type == 'collection_center':
         collection_center = CollectionCenter.objects.get(incharge=request.user)
-        orders = Order.objects.filter(collection_center=collection_center)
+        order_list = Order.objects.filter(collection_center=collection_center)
+        collection_center_list = None
+        user_list = None
     else:
-        orders= None
-    collection_centers = CollectionCenter.objects.all() if request.user.user_type == 'admin' else None
-    users = CustomUser.objects.all()  if request.user.user_type == 'admin' else None
-    clothes = Clothes.objects.all() 
-    cloth_categories = Cloth_Category.objects.all()
-    subscriptions = Subscription.objects.all()
-    context= { 
+        order_list = None
+        collection_center_list = None
+        user_list = None
+
+    clothes_list = Clothes.objects.all()
+    cloth_categories_list = Cloth_Category.objects.all()
+    subscription_list = Subscription.objects.all()
+
+    order_paginator = Paginator(order_list, 10)  # Set the number of orders per page
+    order_page_number = request.GET.get('orders_page')
+    orders = order_paginator.get_page(order_page_number)
+
+    collection_center_paginator = Paginator(collection_center_list, 10)  # Set the number of collection centers per page
+    collection_center_page_number = request.GET.get('collection_centers_page')
+    collection_centers = collection_center_paginator.get_page(collection_center_page_number)
+
+    user_paginator = Paginator(user_list, 10)  # Set the number of users per page
+    user_page_number = request.GET.get('users_page')
+    users = user_paginator.get_page(user_page_number)
+
+    clothes_paginator = Paginator(clothes_list, 10)  # Set the number of clothes per page
+    clothes_page_number = request.GET.get('clothes_page')
+    clothes = clothes_paginator.get_page(clothes_page_number)
+
+    cloth_categories_paginator = Paginator(cloth_categories_list, 10)  # Set the number of cloth categories per page
+    cloth_categories_page_number = request.GET.get('cloth_categories_page')
+    cloth_categories = cloth_categories_paginator.get_page(cloth_categories_page_number)
+
+    subscription_paginator = Paginator(subscription_list, 10)  # Set the number of subscriptions per page
+    subscription_page_number = request.GET.get('subscriptions_page')
+    subscriptions = subscription_paginator.get_page(subscription_page_number)
+
+    context = { 
         'orders': orders,
         'collection_centers': collection_centers,
         'users': users,
@@ -56,6 +87,7 @@ def home(request):
         'cloth_categories': cloth_categories,
         'subscriptions': subscriptions
     }
+
     return render(request=request, template_name='dashboard/home.html', context=context)
 
 
