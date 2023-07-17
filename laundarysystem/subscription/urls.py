@@ -16,6 +16,9 @@ urlpatterns = [
     path('subscribe/<int:subscription_id>/', views.subscribe, name='subscribe'),
     path('success/', views.subscription_success, name='subscription_success'),
 
+        path('user_orders/', views.user_orders, name='user_orders'),
+
+
 
 
 ]
