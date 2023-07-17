@@ -1,10 +1,8 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block content %}
+{% extends 'base.html' %} 
+{% load static %} {% block content %}
 <!-- Add Bootstrap CSS link -->
-<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
-<link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}" />
+<link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}" />
 
 <div class="container container-fluid content-wrapper">
   <div class="row">
@@ -12,29 +10,59 @@
       <div class="sidebar">
         <ul class="nav flex-column bg-secondary">
           <li class="nav-item">
-            <a class="nav-link text-white" href="#users" onclick="showContent('users')"><i class="fas fa-users"></i> Users</a>
+            <a
+              class="nav-link text-white"
+              href="#users"
+              onclick="showContent('users')"
+              ><i class="fas fa-users"></i> Users</a
+            >
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#orders" onclick="showContent('orders')"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a
+              class="nav-link text-white"
+              href="#orders"
+              onclick="showContent('orders')"
+              ><i class="fas fa-shopping-cart"></i> Orders</a
+            >
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#collection-centers" onclick="showContent('collection-centers')"><i class="fas fa-map-marker-alt"></i> Collection Centers</a>
+            <a
+              class="nav-link text-white"
+              href="#collection-centers"
+              onclick="showContent('collection-centers')"
+              ><i class="fas fa-map-marker-alt"></i> Collection Centers</a
+            >
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#clothes" onclick="showContent('clothes')"><i class="fas fa-tshirt"></i> Clothes</a>
+            <a
+              class="nav-link text-white"
+              href="#clothes"
+              onclick="showContent('clothes')"
+              ><i class="fas fa-tshirt"></i> Clothes</a
+            >
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#cloth-categories" onclick="showContent('cloth-categories')"><i class="fas fa-tags"></i> Cloth Categories</a>
+            <a
+              class="nav-link text-white"
+              href="#cloth-categories"
+              onclick="showContent('cloth-categories')"
+              ><i class="fas fa-tags"></i> Cloth Categories</a
+            >
           </li>
           <li class="nav-item">
-            <a class="nav-link text-white" href="#subscriptions" onclick="showContent('subscriptions')"><i class="fas fa-file-alt"></i> Subscriptions</a>
+            <a
+              class="nav-link text-white"
+              href="#subscriptions"
+              onclick="showContent('subscriptions')"
+              ><i class="fas fa-file-alt"></i> Subscriptions</a
+            >
           </li>
         </ul>
       </div>
     </div>
-    <div class="col-md-9">
 
-      
+    <div class="col-md-9">
+      <!--Users-->
       <div id="users" class="content-section">
         <h2>Users</h2>
         <table class="table table-hover">
@@ -47,6 +75,7 @@
               <th>Action</th>
             </tr>
           </thead>
+
           <tbody>
             {% for user in users %}
             <tr>
@@ -55,564 +84,946 @@
               <td>{{ user.last_name }}</td>
               <td>{{ user.email }}</td>
               <td>
-                <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#userModal{{ user.id }}">
+                <button
+                  class="btn btn-sm btn-primary"
+                  data-toggle="modal"
+                  data-target="#userModal{{ user.id }}"
+                >
                   <i class="fas fa-eye"></i>
                 </button>
                 <button class="btn btn-sm btn-success">
                   <i class="fas fa-edit"></i>
                 </button>
-          
-                <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteUserModal{{ user.id }}">
+
+                <button
+                  class="btn btn-sm btn-danger"
+                  data-toggle="modal"
+                  data-target="#deleteUserModal{{ user.id }}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="step-links">
+            {% if users.has_previous %}
+            <a href="?users_page=1#users">&laquo; first</a>
+            <a href="?users_page={{ users.previous_page_number }}#users"
+              >previous</a
+            >
+            {% endif %}
+
+            <span class="current-page">
+              Page {{ users.number }} of {{ users.paginator.num_pages }}.
+            </span>
+
+            {% if users.has_next %}
+            <a href="?users_page={{ users.next_page_number }}#users">next</a>
+            <a href="?users_page={{ users.paginator.num_pages }}#users"
+              >last &raquo;</a
+            >
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!--Orders-->
+      <div id="orders" class="content-section">
+        <h2>Orders</h2>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>User</th>
+              <th>Collection Center</th>
+              <th>Pickup Location</th>
+              <th>Pickup Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+            <tr>
+              <td
+                onclick="window.location.href='{% url 'dashboard:order_details' order.pk %}'"
+              >
+                {{ order.pk }}
+              </td>
+              <td>{{ order.user.first_name }}</td>
+              <td>{{ order.collection_center }}</td>
+              <td>{{ order.pickup_location }}</td>
+              <td>{{ order.pickup_date }}</td>
+              <td>{{ order.get_status_display }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-primary"
+                  data-toggle="modal"
+                  data-target="#orderModal{{ order.pk }}"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-success">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger">
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
             </tr>
 
-
-
-                     <!-- User Delete Modal -->
-                     <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">Delete User</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
-                          </div>
-                          <div class="modal-body">
-                            <p>Are you sure you want to delete the user:<strong> {{user.first_name}} {{user.last_name}} </strong> ?</p>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            <form action="{% url 'dashboard:delete_user' user.id %}" method="post">
-                              {% csrf_token %}
-                              <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-              
-
-                  
-                  
-                      <!-- User Detail Modal -->
-            <div class="modal fade" id="userModal{{ user.id }}" tabindex="-1" aria-labelledby="userModalLabel{{ user.id }}" aria-hidden="true">
+            <div
+              class="modal fade"
+              id="orderModal{{ order.pk }}"
+              tabindex="-1"
+              aria-labelledby="orderModalLabel{{ order.pk }}"
+              aria-hidden="true"
+            >
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="userModalLabel{{ user.id }}">User Details</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="orderModalLabel{{ order.pk }}">
+                      Order Details
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
                   <div class="modal-body">
-                    <p>First Name: {{ user.first_name }}</p>
-                    <p>Last Name: {{ user.last_name }}</p>
-                    <p>Phone: {{ user.phone_number }}</p>
-                    <p>Email: {{ user.email }}</p>
-                    <p>Address: {{ user.address }}</p>
-                    <p>Account: {{ user.get_account_status_display }}</p>
-                    <p>Type: {{ user.get_account_status_display }}</p>
+                    <p>User: {{ order.user }}</p>
+                    <p>Collection Center: {{ order.collection_center }}</p>
+                    <p>Pickup Location: {{ order.pickup_location }}</p>
+                    <p>Pickup Date: {{ order.pickup_date }}</p>
+                    <p>Status: {{ order.get_status_display }}</p>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      onclick="window.location.href='{% url 'dashboard:order_details' order.pk %}'"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    {% if user.user_type == 'admin' %}
                     <button type="button" class="btn btn-primary">Edit</button>
                     <button type="button" class="btn btn-danger">Delete</button>
+                    {% endif %}
                   </div>
                 </div>
               </div>
             </div>
-          
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
 
+            {% endfor %}
+          </tbody>
+        </table>
 
-    <div id="orders" class="content-section">
-      <h2>Orders</h2>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Order #</th>
-            <th>User</th>
-            <th>Collection Center</th>
-            <th>Pickup Location</th>
-            <th>Pickup Date</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-         
-
-
-          {% for order in orders %}
-          <tr>
-            <td onclick="window.location.href='{% url 'dashboard:order_details' order.pk %}'" >{{ order.pk }}</td>
-            <td>{{ order.user.first_name }}</td>
-            <td>{{ order.collection_center }}</td>
-            <td>{{ order.pickup_location }}</td>
-            <td>{{ order.pickup_date }}</td>
-            <td>{{ order.get_status_display }}</td>
-            <td>
-              <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#orderModal{{ order.pk }}">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-success">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btn btn-sm btn-danger">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-
-          <div class="modal fade" id="orderModal{{ order.pk }}" tabindex="-1" aria-labelledby="orderModalLabel{{ order.pk }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="orderModalLabel{{ order.pk }}">Order Details</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>User: {{ order.user }}</p>
-                  <p>Collection Center: {{ order.collection_center }}</p>
-                  <p>Pickup Location: {{ order.pickup_location }}</p>
-                  <p>Pickup Date: {{ order.pickup_date }}</p>
-                  <p>Status: {{ order.get_status_display }}</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'dashboard:order_details' order.pk %}'" > View Details</button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  {% if user.user_type == 'admin' %}
-                  <button type="button" class="btn btn-primary">Edit</button>
-                  <button type="button" class="btn btn-danger">Delete</button>
-                  {% endif %}
-
-                </div>
-              </div>
-            </div>
-          </div>
-         
-
-          {% endfor %}
-        </tbody>
-      </table>
-      
-    </div>
-    <div id="collection-centers" class="content-section">
-      <h2>Collection Centers</h2>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Description</th>
-            <th>Active Status</th>
-            <th>Incharge</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for center in collection_centers %}
-          <tr>
-            <td>{{ center.name }}</td>
-            <td>{{ center.address }}</td>
-            <td>{{ center.description }}</td>
-            {% if center.active %}
-            <td class="text-success">Active</td>
-            {% else %}
-            <td class="text-danger">Inactive</td>
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="step-links">
+            {% if orders.has_previous %}
+            <a href="?orders_page=1#orders">&laquo; first</a>
+            <a href="?orders_page={{ orders.previous_page_number }}#orders"
+              >previous</a
+            >
             {% endif %}
-            <td>{{ center.incharge }}</td>
-            <td>
-              <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#centerModal{{ center.pk }}">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-success" onclick="window.location.href='{% url 'dashboard:update_collection_center' center.pk %}'">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteCenterModal{{ center.pk }}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
 
+            <span class="current-page">
+              Page {{ orders.number }} of {{ orders.paginator.num_pages }}.
+            </span>
 
-          <!--Collection Center Details-->
-          <div class="modal fade" id="centerModal{{ center.pk }}" tabindex="-1" aria-labelledby="centerModalLabel{{ center.pk }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="centerModalLabel{{ center.pk }}">Collection Center Details</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Name: {{ center.name }}</p>
-                  <p>Address: {{ center.address }}</p>
-                  <p>Description: {{ center.description }}</p>
-                  <p>Active Status: {% if center.active %}Active{% else %}Inactive{% endif %}</p>
-                  <p>Incharge: {{ center.incharge }}</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <a href="{% url 'dashboard:update_collection_center' center.pk %}" class="btn btn-primary">Edit</a>
-
-                  <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteCenterModal{{ center.pk }}">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Confirmation Delete Modal-->
-
-          <div class="modal fade" id="deleteCenterModal{{ center.pk }}" tabindex="-1" aria-labelledby="deleteCenterModalLabel{{ center.pk }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="deleteCenterModalLabel{{ center.pk }}">Delete Collection Center</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Are you sure you want to delete the collection center: <strong>{{ center.name }}</strong>?</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                  <a href="{% url 'dashboard:delete_collection_center' center.pk %}" class="btn btn-danger">Delete</a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div id="clothes" class="content-section">
-      <h2>Clothes</h2>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Regular Price</th>
-            <th>Offer Price</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for cloth in clothes %}
-          <tr>
-            <td>{{ cloth.name }}</td>
-            <td>{{ cloth.category.name }}</td>
-            <td>{{ cloth.reg_price }}</td>
-            <td>{{ cloth.offer_price }}</td>
-            <td>
-              <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#clothModal{{ cloth.pk }}">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-success" onclick="window.location.href='{% url 'dashboard:update_cloth' cloth.pk %}'">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteClothModal{{ cloth.pk }}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-          <!--Cloth Detail Modal-->
-          <div class="modal fade" id="clothModal{{ cloth.pk }}" tabindex="-1" aria-labelledby="clothModalLabel{{ cloth.pk }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="clothModalLabel{{ cloth.pk }}">Cloth Details</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Name: {{ cloth.name }}</p>
-                  <p>Category: {{ cloth.category.name }}</p>
-                  <p>Regular Price: {{ cloth.reg_price }}</p>
-                  <p>Offer Price: {{ cloth.offer_price }}</p>
-                  <p>Updated: {{ cloth.update }}</p>
-                  <p>Created: {{ cloth.created }}</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <a href="{% url 'dashboard:update_cloth' cloth.pk %}" class="btn btn-primary">Edit</a>
-                  <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteClothModal{{ cloth.pk }}">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        <!-- CLoth Delete Modal -->
-        <div class="modal fade" id="deleteClothModal{{ cloth.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteClothModalLabel{{ cloth.id }}" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="deleteClothModalLabel{{ cloth.id }}">Delete Cloth</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <p>Are you sure you want to delete the cloth:<strong> {{cloth.name}} </strong> ?</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <form action="{% url 'dashboard:delete_cloth' cloth.id %}" method="post">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-              </div>
-            </div>
-          </div>
+            {% if orders.has_next %}
+            <a href="?orders_page={{ orders.next_page_number }}#orders">next</a>
+            <a href="?orders_page={{ orders.paginator.num_pages }}#orders"
+              >last &raquo;</a
+            >
+            {% endif %}
+          </span>
         </div>
+      </div>
 
+      <!--Collection Centers-->
+      <div id="collection-centers" class="content-section">
+        <h2>Collection Centers</h2>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Description</th>
+              <th>Active Status</th>
+              <th>Incharge</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for center in collection_centers %}
+            <tr>
+              <td>{{ center.name }}</td>
+              <td>{{ center.address }}</td>
+              <td>{{ center.description }}</td>
+              {% if center.active %}
+              <td class="text-success">Active</td>
+              {% else %}
+              <td class="text-danger">Inactive</td>
+              {% endif %}
+              <td>{{ center.incharge }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-primary"
+                  data-toggle="modal"
+                  data-target="#centerModal{{ center.pk }}"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-success"
+                  onclick="window.location.href='{% url 'dashboard:update_collection_center' center.pk %}'"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  data-toggle="modal"
+                  data-target="#deleteCenterModal{{ center.pk }}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
 
-          {% endfor %}
-        </tbody>
-      </table>
+            <!--Collection Center Details-->
+            <div
+              class="modal fade"
+              id="centerModal{{ center.pk }}"
+              tabindex="-1"
+              aria-labelledby="centerModalLabel{{ center.pk }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="centerModalLabel{{ center.pk }}"
+                    >
+                      Collection Center Details
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Name: {{ center.name }}</p>
+                    <p>Address: {{ center.address }}</p>
+                    <p>Description: {{ center.description }}</p>
+                    <p>
+                      Active Status: {% if center.active %}Active{% else %}Inactive{% endif %}
+                    </p>
+                    <p>Incharge: {{ center.incharge }}</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <a
+                      href="{% url 'dashboard:update_collection_center' center.pk %}"
+                      class="btn btn-primary"
+                      >Edit</a
+                    >
+
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      data-toggle="modal"
+                      data-target="#deleteCenterModal{{ center.pk }}"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirmation Delete Modal-->
+
+            <div
+              class="modal fade"
+              id="deleteCenterModal{{ center.pk }}"
+              tabindex="-1"
+              aria-labelledby="deleteCenterModalLabel{{ center.pk }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="deleteCenterModalLabel{{ center.pk }}"
+                    >
+                      Delete Collection Center
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                      Are you sure you want to delete the collection center:
+                      <strong>{{ center.name }}</strong>?
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                    <a
+                      href="{% url 'dashboard:delete_collection_center' center.pk %}"
+                      class="btn btn-danger"
+                      >Delete</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="step-links">
+            {% if collection_centers.has_previous %}
+            <a href="?collection_centers_page=1#collection_centers">&laquo; first</a>
+            <a
+              href="?collection_centers_page={{ collection_centers.previous_page_number }}#collection_centers">previous</a>
+            {% endif %}
+
+            <span class="current-page">
+              Page {{ collection_centers.number }} of {{collection_centers.paginator.num_pages }}.
+            </span>
+
+            {% if collection_centers.has_next %}
+            <a
+              href="?collection_centers_page={{ collection_centers.next_page_number }}#collection_centers">next</a>
+            <a
+              href="?collection_centers_page={{ collection_centers.paginator.num_pages }}#collection_centers">last &raquo;</a>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!--Clothes-->
+      <div id="clothes" class="content-section">
+        <h2>Clothes</h2>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Regular Price</th>
+              <th>Offer Price</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cloth in clothes %}
+            <tr>
+              <td>{{ cloth.name }}</td>
+              <td>{{ cloth.category.name }}</td>
+              <td>{{ cloth.reg_price }}</td>
+              <td>{{ cloth.offer_price }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-primary"
+                  data-toggle="modal"
+                  data-target="#clothModal{{ cloth.pk }}"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-success"
+                  onclick="window.location.href='{% url 'dashboard:update_cloth' cloth.pk %}'"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  data-toggle="modal"
+                  data-target="#deleteClothModal{{ cloth.pk }}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <!--Cloth Detail Modal-->
+            <div
+              class="modal fade"
+              id="clothModal{{ cloth.pk }}"
+              tabindex="-1"
+              aria-labelledby="clothModalLabel{{ cloth.pk }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="clothModalLabel{{ cloth.pk }}">
+                      Cloth Details
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Name: {{ cloth.name }}</p>
+                    <p>Category: {{ cloth.category.name }}</p>
+                    <p>Regular Price: {{ cloth.reg_price }}</p>
+                    <p>Offer Price: {{ cloth.offer_price }}</p>
+                    <p>Updated: {{ cloth.update }}</p>
+                    <p>Created: {{ cloth.created }}</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <a
+                      href="{% url 'dashboard:update_cloth' cloth.pk %}"
+                      class="btn btn-primary"
+                      >Edit</a
+                    >
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      data-toggle="modal"
+                      data-target="#deleteClothModal{{ cloth.pk }}"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CLoth Delete Modal -->
+            <div
+              class="modal fade"
+              id="deleteClothModal{{ cloth.id }}"
+              tabindex="-1"
+              role="dialog"
+              aria-labelledby="deleteClothModalLabel{{ cloth.id }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="deleteClothModalLabel{{ cloth.id }}"
+                    >
+                      Delete Cloth
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                      Are you sure you want to delete the cloth:<strong>
+                        {{cloth.name}}
+                      </strong>
+                      ?
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                    <form
+                      action="{% url 'dashboard:delete_cloth' cloth.id %}"
+                      method="post"
+                    >
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="step-links">
+            {% if clothes.has_previous %}
+            <a href="?clothes_page=1#clothes">&laquo; first</a>
+            <a href="?clothes_page={{ clothes.previous_page_number }}#clothes"
+              >previous</a
+            >
+            {% endif %}
+
+            <span class="current-page">
+              Page {{ clothes.number }} of {{ clothes.paginator.num_pages }}.
+            </span>
+
+            {% if clothes.has_next %}
+            <a href="?clothes_page={{ clothes.next_page_number }}#clothes"
+              >next</a
+            >
+            <a href="?clothes_page={{ clothes.paginator.num_pages }}#clothes"
+              >last &raquo;</a
+            >
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!--Cloth Categories-->
+      <div id="cloth-categories" class="content-section">
+        <h2>Cloth Categories</h2>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for category in cloth_categories %}
+            <tr>
+              <td>{{ category.name }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-primary"
+                  data-toggle="modal"
+                  data-target="#categoryModal{{ category.pk }}"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-success">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  data-toggle="modal"
+                  data-target="#deleteCategoryModal{{ category.pk }}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <div
+              class="modal fade"
+              id="categoryModal{{ category.pk }}"
+              tabindex="-1"
+              aria-labelledby="categoryModalLabel{{ category.pk }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="categoryModalLabel{{ category.pk }}"
+                    >
+                      Category Details
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Name: {{ category.name }}</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <button type="button" class="btn btn-primary">Edit</button>
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      data-toggle="modal"
+                      data-target="#deleteCategoryModal{{ category.pk }}"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="modal fade"
+              id="deleteCategoryModal{{ category.id }}"
+              tabindex="-1"
+              aria-labelledby="deleteCategoryModalLabel{{ category.pk }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="deleteCategoryModalLabel{{ category.id }}"
+                    >
+                      Delete Category
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                      Are you sure you want to delete the category:
+                      <strong>{{ category.name }}</strong>?
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                    <form
+                      action="{% url 'dashboard:delete_category' category.id %}"
+                      method="post"
+                    >
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="step-links">
+            {% if cloth_categories.has_previous %}
+            <a href="?cloth_categories_page=1#cloth_categories">&laquo; first</a>
+            <a
+              href="?cloth_categories_page={{ cloth_categories.previous_page_number }}#cloth_categories">previous</a>
+            {% endif %}
+
+            <span class="current-page">
+              Page {{ cloth_categories.number }} of {{cloth_categories.paginator.num_pages }}.
+            </span>
+
+            {% if cloth_categories.has_next %}
+            <a
+              href="?cloth_categories_page={{ cloth_categories.next_page_number }}#cloth_categories">next</a>
+            <a href="?cloth_categories_page={{ cloth_categories.paginator.num_pages }}#cloth_categories">last &raquo;</a>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- Subscriptions-->
+      <div id="subscriptions" class="content-section">
+        <h2>Subscriptions</h2>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Pickup</th>
+              <th>Validity</th>
+              <th>Weight</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for subscription in subscriptions %}
+            <tr>
+              <td>{{ subscription.name }}</td>
+              <td>{{ subscription.price }}</td>
+              <td>{{ subscription.pickup }}</td>
+              <td>{{ subscription.validity }}</td>
+              <td>{{ subscription.weight }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-primary"
+                  data-toggle="modal"
+                  data-target="#subscriptionModal{{ subscription.pk }}"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-success"
+                  onclick="window.location.href='{% url 'dashboard:update_subscription' subscription.pk %}'"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  data-toggle="modal"
+                  data-target="#deleteSubscriptionModal{{ subscription.pk }}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Subscription Detail Modal -->
+            <div
+              class="modal fade"
+              id="subscriptionModal{{ subscription.pk }}"
+              tabindex="-1"
+              aria-labelledby="subscriptionModalLabel{{ subscription.pk }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="subscriptionModalLabel{{ subscription.pk }}"
+                    >
+                      Subscription Details
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Name: {{ subscription.name }}</p>
+                    <p>Price: {{ subscription.price }}</p>
+                    <p>Pickup: {{ subscription.pickup }}</p>
+                    <p>Validity: {{ subscription.validity }}</p>
+                    <p>Weight: {{ subscription.weight }}</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Close
+                    </button>
+                    <a
+                      href="{% url 'dashboard:update_subscription' subscription.pk %}"
+                      class="btn btn-primary"
+                      >Edit</a
+                    >
+                    <a
+                      href="{% url 'dashboard:delete_subscription' subscription.pk %}"
+                      class="btn btn-danger"
+                      >Delete</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subscription Confirmation Delete Modal-->
+            <div
+              class="modal fade"
+              id="deleteSubscriptionModal{{ subscription.pk }}"
+              tabindex="-1"
+              aria-labelledby="deleteSubscriptionModalLabel{{ subscription.pk }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="deleteSubscriptionModalLabel{{ subscription.pk }}"
+                    >
+                      Delete Subscription
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                      Are you sure you want to delete the subscription:
+                      <strong>{{ subscription.name }}</strong>?
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                    <a
+                      href="{% url 'dashboard:delete_subscription' subscription.pk %}"
+                      class="btn btn-danger"
+                      >Delete</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+<div class="pagination">
+    <span class="step-links">
+      {% if subscriptions.has_previous %}
+      <a href="?subscriptions_page=1#subscriptions">&laquo; first</a>
+      <a href="?subscriptions_page={{ subscriptions.previous_page_number }}#subscriptions"
+        >previous</a
+      >
+      {% endif %}
+
+      <span class="current-page">
+        Page {{ subscriptions.number }} of {{ subscriptions.paginator.num_pages }}.
+      </span>
+
+      {% if subscriptions.has_next %}
+      <a href="?subscriptions_page={{ subscriptions.next_page_number }}#subscriptions">next</a>
+      <a href="?subscriptions_page={{ subscriptions.paginator.num_pages }}#subscriptions"
+        >last &raquo;</a
+      >
+      {% endif %}
+    </span>
+  </div>
+      </div>
     </div>
-
-
-    <!--Cloth Categories-->
-    <div id="cloth-categories" class="content-section">
-      <h2>Cloth Categories</h2>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for category in cloth_categories %}
-          <tr>
-            <td>{{ category.name }}</td>
-            <td>
-              <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#categoryModal{{ category.pk }}">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-success">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteCategoryModal{{ category.pk }}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-          <div class="modal fade" id="categoryModal{{ category.pk }}" tabindex="-1" aria-labelledby="categoryModalLabel{{ category.pk }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="categoryModalLabel{{ category.pk }}">Category Details</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Name: {{ category.name }}</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary">Edit</button>
-                  <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteCategoryModal{{ category.pk }}">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal fade" id="deleteCategoryModal{{ category.id }}" tabindex="-1" aria-labelledby="deleteCategoryModalLabel{{ category.pk }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="deleteCategoryModalLabel{{ category.id }}">Delete Category</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Are you sure you want to delete the category: <strong>{{ category.name }}</strong>?</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                  <form action="{% url 'dashboard:delete_category' category.id %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-
-    <!-- Subscriptions-->
-    <div id="subscriptions" class="content-section">
-      <h2>Subscriptions</h2>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Pickup</th>
-            <th>Validity</th>
-            <th>Weight</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for subscription in subscriptions %}
-          <tr>
-            <td>{{ subscription.name }}</td>
-            <td>{{ subscription.price }}</td>
-            <td>{{ subscription.pickup }}</td>
-            <td>{{ subscription.validity }}</td>
-            <td>{{ subscription.weight }}</td>
-            <td>
-              <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#subscriptionModal{{ subscription.pk }}">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-success" onclick="window.location.href='{% url 'dashboard:update_subscription' subscription.pk %}'">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteSubscriptionModal{{ subscription.pk }}">
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-    
-          <!-- Subscription Detail Modal -->
-          <div class="modal fade" id="subscriptionModal{{ subscription.pk }}" tabindex="-1" aria-labelledby="subscriptionModalLabel{{ subscription.pk }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="subscriptionModalLabel{{ subscription.pk }}">Subscription Details</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Name: {{ subscription.name }}</p>
-                  <p>Price: {{ subscription.price }}</p>
-                  <p>Pickup: {{ subscription.pickup }}</p>
-                  <p>Validity: {{ subscription.validity }}</p>
-                  <p>Weight: {{ subscription.weight }}</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <a href="{% url 'dashboard:update_subscription' subscription.pk %}" class="btn btn-primary">Edit</a>
-                  <a href="{% url 'dashboard:delete_subscription' subscription.pk %}" class="btn btn-danger">Delete</a>
-                </div>
-              </div>
-            </div>
-          </div>
-    
-          <!-- Subscription Confirmation Delete Modal-->
-          <div class="modal fade" id="deleteSubscriptionModal{{ subscription.pk }}" tabindex="-1" aria-labelledby="deleteSubscriptionModalLabel{{ subscription.pk }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="deleteSubscriptionModalLabel{{ subscription.pk }}">Delete Subscription</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Are you sure you want to delete the subscription: <strong>{{ subscription.name }}</strong>?</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                  <a href="{% url 'dashboard:delete_subscription' subscription.pk %}" class="btn btn-danger">Delete</a>
-                </div>
-              </div>
-            </div>
-          </div>
-    
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    
-
-
-
-
   </div>
 
- 
-</div>
+  <!-- Add Bootstrap JS script -->
+  <script src="{% static 'bootstrap.min.js' %}"></script>
+  <script>
+    function showContent(sectionId) {
+      var contentSections = document.getElementsByClassName("content-section");
+      for (var i = 0; i < contentSections.length; i++) {
+        contentSections[i].style.display = "none";
+      }
+      document.getElementById(sectionId).style.display = "block";
+    }
 
-<!-- Add Bootstrap JS script -->
-<script src="{% static 'bootstrap.min.js' %}"></script>
-<script>
-  function showContent(sectionId) {
+    // Hide all content sections initially
     var contentSections = document.getElementsByClassName("content-section");
     for (var i = 0; i < contentSections.length; i++) {
       contentSections[i].style.display = "none";
     }
-    document.getElementById(sectionId).style.display = "block";
-  }
 
-  // Hide all content sections initially
-  var contentSections = document.getElementsByClassName("content-section");
-  for (var i = 0; i < contentSections.length; i++) {
-    contentSections[i].style.display = "none";
-  }
+    window.onload = function () {
+      var fragment = window.location.hash.substring(1);
+      if (fragment) {
+        showContent(fragment);
+      }
+    };
+  </script>
 
-  window.onload = function() {
-    var fragment = window.location.hash.substring(1);
-    if (fragment) {
-      showContent(fragment);
+  <style>
+    html,
+    body {
+      height: 100%;
     }
-  };
 
+    .content-wrapper {
+      min-height: calc(
+        100vh - 5rem - 56px
+      ); /* Subtracting padding and footer height */
+      padding-bottom: 2rem; /* Adjust as needed */
+    }
 
-  
-</script>
-
-
-<style>
-
-    html, body {
-        height: 100%;
-      }
-
-      .content-wrapper {
-        min-height: calc(100vh - 5rem - 56px); /* Subtracting padding and footer height */
-        padding-bottom: 2rem; /* Adjust as needed */
-      }
-      
-      .footer {
-        background-color: #f5f5f5;
-        text-align: center;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-      }
-
-</style>
-{% endblock %}
+    .footer {
+      background-color: #f5f5f5;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+    }
+  </style>
+  {% endblock %}
+</div>
