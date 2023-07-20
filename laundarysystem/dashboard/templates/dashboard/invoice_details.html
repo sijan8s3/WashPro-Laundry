@@ -39,10 +39,53 @@
   .invoice-details .invoice-total h4 {
     margin: 10px 0;
   }
+
+  /* Define print styles */
+  @media print {
+    body * {
+      visibility: hidden;
+  }
+    
+    .print-visible {
+      visibility: visible;
+    }
+
+    .print-invisible {
+      visibility: hidden;
+    }
+
+    .footer {
+      visibility: hidden;
+    }
+
+    .invoice-details,
+    .invoice-summary {
+      background-color: white;
+      color: black;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Adjust margins and other styles for print layout */
+    .container {
+      margin: 0;
+    }
+
+    .invoice-items table th,
+    .invoice-items table td {
+      border: 1px solid black;
+    }
+  }
+
+
+
+
 </style>
 
 <div class="container">
-  <div class="invoice-details">
+  <div class="invoice-details print-visible">
     <div class="invoice-header">
       <h2>Invoice</h2>
       <p>Issuer: {{ invoice.issuer_name }}</p>
@@ -50,15 +93,28 @@
     </div>
 
     <div class="invoice-info">
-      <p><strong>Invoice Number:</strong> {{ invoice.invoice_number }}</p>
-      <p><strong>Issue Date:</strong> {{ invoice.issue_date }}</p>
-      <p><strong>Due Date:</strong> {{ invoice.due_date }}</p>
-      <p><strong>Billing Name:</strong> {{ invoice.billing_name }}</p>
-      <p><strong>Billing Address:</strong> {{ invoice.billing_address }}</p>
-      <p><strong>Billing Contact:</strong> {{ invoice.billing_contact }}</p>
-      <p><strong>Payment Status:</strong> {{ invoice.payment_status }}</p>
-      <p><strong>Payment Method:</strong> {{ invoice.payment_method }}</p>
-      <p><strong>Notes:</strong> {{ invoice.notes }}</p>
+      <div class="row">
+        <!-- Invoice Info: Left Column -->
+        <div class="col-md-6">
+          <div class="invoice-info">
+            <p><strong>Invoice Number:</strong> {{ invoice.invoice_number }}</p>
+            <p><strong>Issue Date:</strong> {{ invoice.issue_date }}</p>
+            <p><strong>Due Date:</strong> {{ invoice.due_date }}</p>
+            <p><strong>Payment Status:</strong> {{ invoice.payment_status }}</p>
+          </div>
+        </div>
+  
+        <!-- Invoice Info: Right Column -->
+        <div class="col-md-6">
+          <div class="invoice-info">
+            <p><strong>Billing Name:</strong> {{ invoice.billing_name }}</p>
+            <p><strong>Billing Address:</strong> {{ invoice.billing_address }}</p>
+            <p><strong>Billing Contact:</strong> {{ invoice.billing_contact }}</p>
+            <p><strong>Payment Method:</strong> {{ invoice.payment_method }}</p>
+            <p><strong>Notes:</strong> {{ invoice.notes }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="invoice-items">
@@ -100,15 +156,32 @@
 
 
 
-<div class="invoice-summary">
+<div class="invoice-summary print-visible">
   <p class="text-right">Total Amount: {{ invoice.total_amount }}</p>
   <p class="text-right">Payment Status: {{ invoice.payment_status }}</p>
 </div>
 
-{% if invoice.payment_status == 'Pending' %}
-<div class="proceed-to-pay">
+{% if invoice.payment_status == 'Pending' %}  
+{% if request.user.user_type != 'user' %}
+<div class="proceed-to-pay print-invisible">
   <a href="{% url 'dashboard:pay_invoice' invoice_id=invoice.id %}" class="btn btn-primary">Proceed to Pay</a>
 </div>
 {% endif %}
+{% endif %}
+
+
+<!-- Print icon at the bottom right -->
+<div class="print-icon print-invisible">
+  <button class="btn btn-secondary" onclick="printInvoice()">
+    <i class="fas fa-print"></i> Print Invoice
+  </button>
+</div>
+
+<script>
+  function printInvoice() {
+    window.print();
+  }
+</script>
+
 
 {% endblock %}

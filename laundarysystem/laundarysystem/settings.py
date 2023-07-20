@@ -49,8 +49,6 @@ INSTALLED_APPS = [
     'orders.apps.OrdersConfig',
     'accounts.apps.AccountsConfig',
     'subscription.apps.SubscriptionConfig',
-    'rest_framework',
-    'khalti',
 
 ]
 
@@ -158,6 +156,7 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_USER_TLS = True
 
 
-KHALTI_SECRET_KEY = "<your api key>"
-KHALTI_VERIFY_URL = "https://khalti.com/api/v2/payment/verify/"
 
+# Media Settings
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

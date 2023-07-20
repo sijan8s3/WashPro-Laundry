@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2>Update Order</h2>
+  <form method="post" class="order-form">
+    {% csrf_token %}
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+      {{ error }}
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success" role="alert">
+      {{ success }}
+    </div>
+    {% endif %}
+    <div class="form-group">
+      <label for="collection_center">Collection Center:</label>
+      <select class="form-control" id="collection_center" name="collection_center">
+        {% for center in collection_centers %}
+        <option value="{{ center.id }}" {% if order.collection_center.id == center.id %}selected{% endif %}>{{ center.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+        <label for="user">User:</label>
+        <select class="form-control user-select" id="user" name="user" required>
+          <option value="{{ order.user.id }}" selected>{{ order.user }}</option>
+        </select>
+      </div>
+
+
+    <div class="form-group">
+      <label for="pickup_location">Pickup Location:</label>
+      <input type="text" class="form-control" id="pickup_location" name="pickup_location" value="{{ order.pickup_location }}" required>
+    </div>
+    <div class="form-group">
+      <label for="pickup_date">Pickup Date:</label>
+      <input type="date" class="form-control" id="pickup_date" name="pickup_date" value="{{ order.pickup_date|date:'Y-m-d' }}" required>
+    </div>
+
+     <!-- Display validation errors for form fields -->
+  {% for field in form %}
+  {% if field.errors %}
+  <div class="alert alert-danger" role="alert">
+    {{ field.errors|striptags }}
+  </div>
+  {% endif %}
+{% endfor %}
+
+
+
+    <div class="order-items">
+      <h3>Order Items</h3>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Select Cloth</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+          </tr>
+        </thead>
+        <tbody id="cloth-table-body">
+          {% for item in order.orderitem.all %}
+          <tr id="cloth-row-{{ forloop.counter }}">
+            <td>
+              <select class="form-control cloth-select" name="cloth_{{ forloop.counter }}" required>
+                <option value="">Select Cloth</option>
+                {% for cloth in clothes %}
+                <option value="{{ cloth.id }}" {% if item.cloth.id == cloth.id %}selected{% endif %} data-price="{{ cloth.offer_price }}">{{ cloth.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              <input type="number" class="form-control quantity-input" name="quantity_{{ forloop.counter }}" value="{{ item.quantity }}" min="1" required>
+            </td>
+            <td class="total-price" id="total-price-1">$0.00</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <button type="button" class="btn btn-secondary" id="add-cloth-btn">Add Cloth</button>
+    </div>
+
+
+      <!-- Display validation errors for formset fields -->
+  {% for form in formset %}
+  {% for field in form %}
+    {% if field.errors %}
+    <div class="alert alert-danger" role="alert">
+      {{ field.errors|striptags }}
+    </div>
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
+
+    <button type="submit" class="btn btn-primary">Update Order</button>
+  </form>
+
+  <div class="order-items-total">
+    <h3>Order Amount: <span id="order-amount">$0.00</span></h3>
+  </div>
+</div>
+
+
+
+<!-- Add JavaScript code to handle cloth selection and calculate total price -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+      const addClothButton = document.querySelector('#add-cloth-btn');
+      const clothTableBody = document.querySelector('#cloth-table-body');
+      let clothRowCounter = 1;
+  
+      addClothButton.addEventListener('click', function() {
+        clothRowCounter++;
+        const newClothRow = `
+          <tr id="cloth-row-${clothRowCounter}">
+            <td>
+              <select class="form-control cloth-select" name="cloth_${clothRowCounter}" required>
+                <option value="">Select Cloth</option>
+                {% for cloth in clothes %}
+                <option value="{{ cloth.id }}" data-price="{{ cloth.offer_price }}">{{ cloth.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              <input type="number" class="form-control quantity-input" name="quantity_${clothRowCounter}" min="1" required>
+            </td>
+            <td class="total-price" id="total-price-${clothRowCounter}">$0.00</td>
+          </tr>
+        `;
+        clothTableBody.insertAdjacentHTML('beforeend', newClothRow);
+      });
+  
+      clothTableBody.addEventListener('input', function(event) {
+        if (event.target.classList.contains('quantity-input') || event.target.classList.contains('cloth-select')) {
+          const clothRow = event.target.closest('tr');
+          const quantityInput = clothRow.querySelector('.quantity-input');
+          const totalPriceCell = clothRow.querySelector('.total-price');
+  
+          const clothSelect = clothRow.querySelector('.cloth-select');
+          const selectedOption = clothSelect.options[clothSelect.selectedIndex];
+          const clothPrice = selectedOption.getAttribute('data-price');
+          const quantity = parseInt(quantityInput.value);
+          const totalPrice = (quantity * clothPrice).toFixed(2);
+  
+          totalPriceCell.textContent = `$${totalPrice}`;
+          calculateOrderAmount();
+        }
+      });
+  
+      function calculateOrderAmount() {
+        const totalPriceCells = document.querySelectorAll('.total-price');
+        let orderAmount = 0;
+  
+        totalPriceCells.forEach(function(totalPriceCell) {
+          const totalPrice = parseFloat(totalPriceCell.textContent.substring(1));
+          orderAmount += totalPrice;
+        });
+  
+        const orderAmountSpan = document.querySelector('#order-amount');
+        orderAmountSpan.textContent = `$${orderAmount.toFixed(2)}`;
+      }
+    });
+  
+      document.addEventListener('DOMContentLoaded', function() {
+    const userSelect = document.querySelector('.user-select');
+    const userSearchUrl = "{% url 'dashboard:user_search' %}";
+
+    // Initialize Select2 for user selection with AJAX
+    $(userSelect).select2({
+      theme: 'bootstrap4',
+      minimumInputLength: 1,
+      ajax: {
+        url: userSearchUrl,
+        dataType: 'json',
+        delay: 250,
+        processResults: function(data) {
+          return {
+            results: data
+          };
+        },
+        cache: true
+      }
+    });
+
+    function calculateInitialTotalPrice() {
+        const totalPriceCells = document.querySelectorAll('.total-price');
+        let orderAmount = 0;
+      
+        totalPriceCells.forEach(function(totalPriceCell) {
+          const totalPrice = parseFloat(totalPriceCell.textContent.substring(1));
+          orderAmount += totalPrice;
+        });
+      
+        const orderAmountSpan = document.querySelector('#order-amount');
+        orderAmountSpan.textContent = `$${orderAmount.toFixed(2)}`;
+      }
+
+
+         // Function to calculate the initial total price for each item
+    function calculateInitialTotalPrice(row) {
+        const clothSelect = row.querySelector('.cloth-select');
+        const selectedOption = clothSelect.options[clothSelect.selectedIndex];
+        const clothPrice = selectedOption.getAttribute('data-price');
+        const quantityInput = row.querySelector('.quantity-input');
+        const quantity = parseInt(quantityInput.value);
+        const totalPrice = (quantity * clothPrice).toFixed(2);
+        return `$${totalPrice}`;
+      }
+      });
+
+
+      // Function to update the total price when cloth selection or quantity changes
+    function updateTotalPrice(row) {
+      const totalPriceCell = row.querySelector('.total-price');
+      totalPriceCell.textContent = calculateInitialTotalPrice(row);
+    }
+
+    // Calculate initial total price for each row when the page loads
+    const clothRows = document.querySelectorAll('.cloth-row');
+    clothRows.forEach(function(row) {
+      updateTotalPrice(row);
+    });
+
+    // Event listener to update the total price when cloth selection or quantity changes
+    const clothTableBody = document.querySelector('#cloth-table-body');
+    clothTableBody.addEventListener('input', function(event) {
+      if (event.target.classList.contains('quantity-input') || event.target.classList.contains('cloth-select')) {
+        const clothRow = event.target.closest('tr');
+        updateTotalPrice(clothRow);
+      }
+    });
+  
+  </script>
+
+
+{% endblock %}

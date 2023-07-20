@@ -10,65 +10,94 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <!-- Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
 
     <style>
         /* Custom styles go here */
-        .signup-form {
-            width: 400px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-        
-        .signup-form h2 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .signup-form .hint-text {
-            color: #999;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .signup-form .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .signup-form .input-group-addon {
-            width: 40px;
-            min-width: 40px;
-            padding: 0;
-            text-align: center;
-        }
-        
-        .signup-form .form-control {
-            height: 40px;
-            font-size: 14px;
-        }
-        
-        .signup-form .btn {
-            font-size: 16px;
-            font-weight: bold;
-            background-color: #f0ad4e;
-            border-color: #f0ad4e;
-        }
-        
-        html, body {
-            height: 100%;
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F1EEE7;
+            color: #282561;
             margin: 0;
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+        }
+
+        .nav-link {
+            font-size: 18px;
+        }
+
+        .nav-link:hover {
+            color: #ed2027;
         }
 
         .content {
             flex: 1;
+            padding: 20px;
         }
 
+        .content h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            color: #ed2027;
+        }
+
+        .btn-primary {
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #ed2027;
+            border-color: #ed2027;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #c41d23;
+        }
+
+        .btn-outline-light {
+            font-size: 18px;
+            color: #282561;
+            border-color: #282561;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-outline-light .btn-text {
+            transition: color 0.3s ease; /* Add transition for color */
+        }
+        
+        .btn-outline-light:hover {
+            background-color: #fff; /* Change the background color to white on hover */
+        }
+        
+        .btn-outline-light:hover .btn-text {
+            color: #ed2027; /* Change the text color to red on hover */
+        }
+        
+        
+        
+
         footer {
-            background-color: #343a40;
-            color: #fff;
+            background-color: #F1EEE7;
+            color: #282561;
             padding: 20px;
             text-align: center;
+            font-size: 14px;
+            width: 100%;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
         }
+        
 
         /* Additional styles for responsiveness */
         @media (max-width: 575.98px) { /* Small devices (up to 575px) */
@@ -76,6 +105,37 @@
                 margin-right: 0;
             }
         }
+
+        .nav-link.dropdown-toggle {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-link.dropdown-toggle .user-icon {
+            margin-right: 5px;
+        }
+        
+        .nav-link.dropdown-toggle .dropdown-toggle-text {
+            color: #282561;
+        }
+        
+        .dropdown-menu {
+            background-color: #fff;
+            color: #282561;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dropdown-menu .dropdown-item {
+            color: #282561;
+        }
+        
+        .dropdown-menu .dropdown-item:hover,
+        .dropdown-menu .dropdown-item:focus {
+            background-color: #F1EEE7;
+            color: #ed2027;
+        }
+        
     </style>
 </head>
 <body>
@@ -84,11 +144,14 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="#">WashPro</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ml-auto">
+                        {% if not user.is_authenticated %}
+
                         <li class="nav-item">
                             <a class="nav-link" href="#">Home</a>
                         </li>
@@ -104,20 +167,36 @@
                         <li class="nav-item">
                             <a class="nav-link" href="#">Subscription</a>
                         </li>
+                        {% endif %}
 
+            
                         {% if user.is_authenticated %}
-                        <a class="nav-link" href="{% url 'account:logout' %}">
-                            <button class="btn btn-outline-light ml-2" name="login">Logout</button>
-                        </a>
+                        <!-- User Icon with Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <div class="user-icon rounded-circle">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="dropdown-toggle-text">Welcome, {{ user.first_name }}</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#">Account Settings</a>
+                                <a class="dropdown-item" href="#">Dashboard</a>
+                                <a class="dropdown-item" href="{% url 'account:logout' %}">Logout</a>
+                            </div>
+                        </li>
+                        
                         {% else %}
                         <li class="nav-item">
                             <a href="{% url 'account:register' %}">
-                            <button class="btn btn-primary nav-link">Signup</button>
+                                <button class="btn btn-primary nav-link">Signup</button>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{% url 'account:login' %}">
-                            <button class="btn btn-outline-light nav-link">Login</button>
+                                <button class="btn btn-outline-light nav-link">
+            <span class="btn-text">Login</span>
+        </button>
                             </a>
                         </li>
                         {% endif %}
@@ -125,7 +204,7 @@
                 </div>
             </div>
         </nav>
-
+      
         <!-- Content -->
         <div class="content">
             <div class="container">
@@ -133,17 +212,24 @@
                 {% endblock %}
             </div>
         </div>
-
-        <!-- Footer -->
-        <footer class="bg-dark text-light text-center py-4">
-            <div class="container">
-                <p>&copy; {{ year }} WashPro. All rights reserved.</p>
-            </div>
-        </footer>
     </div>
 
-    
+     <!-- Footer -->
+
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Select2 JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 </body>
+
+
+<footer class=" bg-dark text-light text-center py-4">
+    <div class="container">
+        <p>&copy; {{ year }} WashPro. All rights reserved.</p>
+    </div>
+</footer>
+
 </html>

@@ -23,7 +23,11 @@ from django.contrib.auth import get_user_model
 from django.db.models import Max
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
-
+from django.forms.models import model_to_dict
+from .models import Feedback
+from .forms import FeedbackForm
+from django.http import JsonResponse
+from django.db.models import Q
 
 
 
@@ -35,15 +39,26 @@ from django.core.paginator import Paginator
 def is_admin(user):
     return user.user_type == 'admin'
 
+def is_cc(user):
+    return user.user_type == 'collection_center'
+
+def is_user(user):
+    return user.user_type == 'user'
+
 @login_required(login_url='account:login')
 def home(request):
-    if request.user.user_type == 'admin':
+    if is_admin(request.user):
         order_list = Order.objects.all()
         collection_center_list = CollectionCenter.objects.all()
         user_list = CustomUser.objects.all()
-    elif request.user.user_type == 'collection_center':
-        collection_center = CollectionCenter.objects.get(incharge=request.user)
+    elif is_cc(request.user):
+        collection_center_list = CollectionCenter.objects.get(incharge=request.user)
         order_list = Order.objects.filter(collection_center=collection_center)
+
+        user_list = None
+
+    elif is_user(request.user):
+        order_list = Order.objects.filter(user=request.user)
         collection_center_list = None
         user_list = None
     else:
@@ -51,9 +66,20 @@ def home(request):
         collection_center_list = None
         user_list = None
 
+    # Handle None cases and make length 0
+    order_list = order_list if order_list is not None else []
+    collection_center_list = collection_center_list if collection_center_list is not None else []
+    user_list = user_list if user_list is not None else []
+   
     clothes_list = Clothes.objects.all()
     cloth_categories_list = Cloth_Category.objects.all()
     subscription_list = Subscription.objects.all()
+
+
+    clothes_list = clothes_list if clothes_list is not None else []
+    subscription_list = subscription_list if subscription_list is not None else []
+    cloth_categories_list = cloth_categories_list if cloth_categories_list is not None else []
+
 
     order_paginator = Paginator(order_list, 10)  # Set the number of orders per page
     order_page_number = request.GET.get('orders_page')
@@ -91,66 +117,10 @@ def home(request):
     return render(request=request, template_name='dashboard/home.html', context=context)
 
 
-'''
 def create_order(request, order_id=None):
     collection_centers = CollectionCenter.objects.all()
     clothes = Clothes.objects.all()
-
-    if order_id:
-        order = get_object_or_404(Order, id=order_id)
-    else:
-        order = None
-
-    if request.method == 'POST':
-        form = OrderForm(request.POST, instance=order)
-        if form.is_valid():
-            order = form.save(commit=False)
-            order.user = request.user
-            order.save()
-
-            # Delete existing order items if updating an order
-            if order_id:
-                OrderItem.objects.filter(order=order).delete()
-
-            data = request.POST
-            cloth_items = []
-            for key, value in data.items():
-                if key.startswith('cloth_'):
-                    cloth_id = key.split('_')[1]
-                    quantity_key = f'quantity_{cloth_id}'
-                    quantity = data.get(quantity_key)
-                    cloth_items.append((cloth_id, quantity))
-
-            for cloth_item in cloth_items:
-                order_item = OrderItem(
-                    order=order,
-                    cloth_id=cloth_item[0],
-                    quantity=cloth_item[1]
-                )
-                order_item.save()
-
-            # Redirect to order details page after successful submission
-            return redirect('dashboard:order_details', order_id=order.id)
-    else:
-        form = OrderForm(instance=order)
-
-    order_items = OrderItem.objects.filter(order=order) if order else []
-
-    context = {
-        'form': form,
-        'order': order,
-        'order_items': order_items,
-        'collection_centers': collection_centers,
-        'clothes': clothes,
-    }
-    return render(request, 'dashboard/create_order.html', context)
-
-'''
-
-
-def create_order(request, order_id=None):
-    collection_centers = CollectionCenter.objects.all()
-    clothes = Clothes.objects.all()
+    users= User.objects.all()
  
     if order_id:
         order = get_object_or_404(Order, id=order_id)
@@ -162,7 +132,7 @@ def create_order(request, order_id=None):
         form = OrderForm(request.POST)
         if form.is_valid():
             order = form.save(commit=False)
-            order.user = request.user
+            #order.user = request.user
             order.save()
 
             data = request.POST
@@ -176,7 +146,6 @@ def create_order(request, order_id=None):
                     quantity = data.get(quantity_key)
                     cloth_items.append((key, value[0], quantity))
 
-            # Printing the cloth items and their quantities
             for cloth_item in cloth_items:
                 # Create a new OrderItem instance
                 cloth=  Clothes.objects.get(pk=cloth_item[1])
@@ -199,11 +168,55 @@ def create_order(request, order_id=None):
         'order': order,
         'collection_centers': collection_centers,
         'clothes': clothes,
+        'users': users,
     }
     return render(request, 'dashboard/create_order.html', context)
 
 
+
+def update_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    collection_centers = CollectionCenter.objects.all()
+    clothes = Clothes.objects.all()
+    users = User.objects.all()
+
+    OrderItemFormSet = inlineformset_factory(Order, OrderItem, fields=('cloth', 'quantity'), extra=1)
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        formset = OrderItemFormSet(request.POST, instance=order)
+        if form.is_valid() and formset.is_valid():
+            order = form.save()  # Save the main order form data
+            formset.save()  # Save the order items formset data
+
+            # Calculate total price for all order items
+            order_items = order.orderitem.all()
+            for item in order_items:
+                item.total_price = item.unit_price * item.quantity
+                item.save()
+
+            messages.success(request, 'Order updated successfully.')
+            return redirect('dashboard:order_detail', order_id=order_id)
+        else:
+            messages.error(request, 'Error updating order. Please check the form data.')
+    else:
+        form = OrderForm(instance=order)
+        formset = OrderItemFormSet(instance=order)
+
+    context = {
+        'form': form,
+        'formset': formset,
+        'order': order,
+        'collection_centers': collection_centers,
+        'clothes': clothes,
+        'users': users,
+    }
+    return render(request, 'dashboard/update_order.html', context)
+
 def create_collection_center(request, collection_center_id=None):
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
+    
     users = User.objects.all().filter(user_type='collection_center')
     collection_center = None
     
@@ -232,6 +245,8 @@ def create_collection_center(request, collection_center_id=None):
 @login_required
 @user_passes_test(is_admin)
 def delete_collection_center(request, center_id):
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
     center = CollectionCenter.objects.get(pk=center_id)
     center.delete()
     redirect_url = reverse('dashboard:home') + '#collection-centers'
@@ -240,30 +255,38 @@ def delete_collection_center(request, center_id):
 @login_required
 @user_passes_test(is_admin)
 def delete_user(request, user_id):
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
     user = User.objects.get(pk=user_id)
     user.delete()
     redirect_url = reverse('dashboard:home') + '#users'
     return HttpResponseRedirect(redirect_url)
 
-#@login_required
-#@user_passes_test(is_admin)
+@login_required
+@user_passes_test(is_admin)
 def delete_cloth(request, cloth_id):
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
     cloth = Clothes.objects.get(pk=cloth_id)
     cloth.delete()
     redirect_url = reverse('dashboard:home') + '#clothes'
     return HttpResponseRedirect(redirect_url)
 
 @login_required
-#@user_passes_test(is_admin)
+@user_passes_test(is_admin)
 def delete_category(request, category_id):
     # Delete the cloth category object
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
     category = Cloth_Category.objects.get(pk=category_id)
     category.delete()
     redirect_url = reverse('dashboard:home') + '#cloth-categories'
     return HttpResponseRedirect(redirect_url)
 
-
+@login_required(login_url='account:login')
 def create_cloth(request, cloth_id=None):
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
     categories = Cloth_Category.objects.all()
 
     if cloth_id:
@@ -288,8 +311,10 @@ def create_cloth(request, cloth_id=None):
     }
     return render(request, 'dashboard/create_cloth.html', context)
 
-
+@login_required(login_url='account:login')
 def create_category(request, category_id=None):
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
     if category_id:
         category = get_object_or_404(Cloth_Category, id=category_id)
     else:
@@ -313,8 +338,10 @@ def create_category(request, category_id=None):
     return render(request, 'dashboard/create_category.html', context)
 
 
-
+@login_required(login_url='account:login')
 def create_subscription(request, subscription_id=None):
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
     if subscription_id:
         subscription = get_object_or_404(Subscription, id=subscription_id)
     else:
@@ -339,31 +366,45 @@ def create_subscription(request, subscription_id=None):
 @login_required
 #@user_passes_test(is_admin)
 def delete_subscription(request, subscription_id):
+    if not is_admin(request.user):
+        return redirect('dashboard:home')
     # Delete the cloth category object
     subs = Subscription.objects.get(pk=subscription_id)
     subs.delete()
     redirect_url = reverse('dashboard:home') + '#subscriptions'
     return HttpResponseRedirect(redirect_url)
 
-
+@login_required(login_url='account:login')
 def order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
+    if is_user(request.user) and order.user  != request.user:
+        return redirect('dashboard:home')
     order_total = sum(item.cloth.offer_price * item.quantity for item in order.orderitem.all())
     invoice = Invoice.objects.filter(order=order).first()
+
+    feedback = Feedback.objects.filter(order=order)
+
 
     context = {
         'order': order,
         'order_total': order_total,
         'invoice': invoice,
+        'feedback': feedback,
+
     }
     return render(request, 'dashboard/order_details.html', context)
 
 
 
-
+@login_required(login_url='account:login')
 def change_order_status(request, order_id):
+    if is_user(request.user) and order.user  != request.user:
+        return redirect('dashboard:home')
     status = request.GET.get('status')
     order = get_object_or_404(Order, id=order_id)
+
+    if is_cc(request.user) and order.collection_center != request.user: 
+        return redirect('dashboard:home')
 
     # Update the order status based on the received status value
     order.status = status
@@ -417,10 +458,12 @@ def change_order_status(request, order_id):
         return redirect('dashboard:order_details', order_id=order.id)
 
 
-
+@login_required(login_url='account:login')
 def create_or_update_user(request, user_id=None):
+    
     user = get_object_or_404(CustomUser, id=user_id) if user_id else None
-
+    if is_user(request.user) and user==None and request.user != user:
+            return redirect('dashboard:home')
     subscriptions = Subscription.objects.all()
     account_status_choices = CustomUser.VERIFICATION_STATUS
 
@@ -447,7 +490,7 @@ def create_or_update_user(request, user_id=None):
     }
     return render(request, 'dashboard/create_user.html', context)
 
-
+@login_required(login_url='account:login')
 def calculate_total_amount(order):
     total_amount = 0
     order_items = OrderItem.objects.filter(order=order)
@@ -455,7 +498,7 @@ def calculate_total_amount(order):
         total_amount += order_item.total_price
     return total_amount
 
-
+@login_required(login_url='account:login')
 def invoice_details(request, invoice_id):
     invoice = get_object_or_404(Invoice, id=invoice_id)
 
@@ -464,8 +507,10 @@ def invoice_details(request, invoice_id):
     }
     return render(request, 'dashboard/invoice_details.html', context)
 
-
+@login_required(login_url='account:login')
 def pay_invoice(request, invoice_id):
+    if is_user(request.user):
+        return redirect('dashboard:home')
     invoice = get_object_or_404(Invoice, id=invoice_id)
     
     # Check if the invoice is already paid
@@ -483,7 +528,7 @@ def pay_invoice(request, invoice_id):
     return HttpResponse('Payment successful. Thank you!')
 
 
-
+@login_required(login_url='account:login')
 def send_email(subject, message, to_email):
     send_mail(
         subject,
@@ -492,4 +537,39 @@ def send_email(subject, message, to_email):
         [to_email],
         fail_silently=False,
         )
+
+
+
+
+def submit_feedback(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST, request.FILES)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.order = order
+            feedback.user = request.user
+            feedback.save()
+            return redirect('dashboard:order_details', order_id=order_id)
+    else:
+        form = FeedbackForm()
+    
+    return render(request, 'dashboard/feedback.html', {'form': form, 'order': order})
+
+
+
+def user_search(request):
+    if request.method == 'GET':
+        query = request.GET.get('q', '')
+        users = User.objects.filter(Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(phone_number__icontains=query))
+        results = [
+            {
+                'id': user.id,
+                'text': f'{user.first_name} {user.last_name} - {user.phone_number}'
+            }
+            for user in users
+        ]
+        return JsonResponse(results, safe=False)
+    
 

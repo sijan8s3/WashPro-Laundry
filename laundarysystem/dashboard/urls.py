@@ -6,7 +6,8 @@ app_name = 'dashboard'
 urlpatterns = [
     path('', views.home, name='home'),
     path('order/create/', views.create_order, name='create_order'),
-    path('order/update/<int:order_id>/', views.create_order, name='update_order'),
+    path('order/update/<int:order_id>/', views.update_order, name='update_order'),
+    #path('order/update/<int:order_id>/', views.update_order, name='update_order'),
 
     path('order/<int:order_id>/', views.order_details, name='order_details'),
     path('change_order_status/<int:order_id>/', views.change_order_status, name='change_order_status'),
@@ -37,6 +38,11 @@ urlpatterns = [
 
     path('invoice/<int:invoice_id>/', views.invoice_details, name='invoice_details'),
     path('invoice/pay/<int:invoice_id>/', views.pay_invoice, name='pay_invoice'),
+
+
+    path('order/<int:order_id>/submit_feedback/', views.submit_feedback, name='submit_feedback'),
+    path('user_search/', views.user_search, name='user_search'),
+
 
 
 ]

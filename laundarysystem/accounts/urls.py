@@ -11,6 +11,9 @@ urlpatterns = [
     path('update-details/', views.update_details, name='update_details'),
     path('change-password/', views.change_password, name='change_password'),
 
+    path('check_phone_number/', views.check_phone_number, name='check_phone_number'),
+
+
 
     
 ]

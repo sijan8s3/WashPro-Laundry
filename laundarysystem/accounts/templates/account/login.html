@@ -1,101 +1,276 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container d-flex align-items-center justify-content-center vh-100">
-    <div class="card shadow-lg animated fadeInDown">
-        <h3 class="card-header text-center">Login to WashPro</h3>
-        <div class="card-body">
-            <form method="POST" action="{% url 'account:login' %}" class="needs-validation" novalidate>
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="phone_number">Phone Number</label>
-                    <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Enter your phone number" required>
-                    <div class="invalid-feedback">
-                        Please enter a valid phone number.
+<div class="container-fluid d-flex align-items-center justify-content-center vh-100">
+    <div class="row w-100">
+
+        
+        <!-- Background -->
+        <div class="col-md-6 bg-primary d-none d-md-block">
+            <!-- Add your beautiful background design here -->
+        </div>
+        <!-- Phone Number Form -->
+        <div class="col-md-6 bg-light">
+            <div class="container d-flex align-items-center justify-content-center vh-100">
+                <div class="card shadow-lg">
+                    <h3 class="card-header text-center">Login/Signup to WashPro</h3>
+
+                    <div class="card-body">
+                        <div id="phoneStep">
+                           
+                            <h4 class="text-center">Please Enter Your Phone Number</h4>
+                            <div class="phone-number-input">
+                                <div class="form-group">
+
+                                <input type="text" id="phone_number" class="form-control phone-number-box" maxlength="10" placeholder="Enter your phone number">
+                                <div class="invalid-feedback">
+                                    Please enter a 10-digit phone number starting with 98.
+                                </div>
+                            </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <!-- Updated button ID to phoneSubmitBtn -->
+                                <button type="submit" class="btn btn-primary" id="phoneSubmitBtn">Continue</button>
+                            </div>
+                        </div>
+
+                        <div id="signupStep" style="display: none;">
+                            <!-- Add signup fields here (e.g., name, email, password) -->
+                            <h4 class="text-center">Please Signup to Continue</h4>
+                            <div class="form-group">
+                                <input type="text" id="firstNameInput" class="form-control" placeholder="First Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="lastNameInput" class="form-control" placeholder="Last Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="userPhoneNumber" class="form-control" placeholder="Phone Number" disabled>
+                            </div>
+                            <div class="form-group d-flex align-items-center">
+                                <input type="password" class="form-control flex-grow-1" placeholder="Password" id="passwordInputSignup">
+                                <button type="button" class="btn btn-outline-secondary toggle-password" id="togglePasswordSignup">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="signupError" class="text-danger text-center"></div>
+
+                            <div class="text-center mt-3">
+                                <button type="button" id="signupBtn" class="btn btn-primary" id="signupBtn">Register</button>
+                            </div>
+
+                        </div>
+                        
+                        <div id="loginStep" style="display: none;">
+                            <!-- Add login fields here (e.g., password, remember me, etc.) -->
+                            <h4 class="text-center">Please Login to Continue</h4>
+                            
+                            <div class="form-group d-flex align-items-center">
+                                <input type="password" class="form-control flex-grow-1" name="password" autocomplete="current-password" placeholder="Password" id="passwordInput">
+                                <button type="button" class="btn btn-outline-secondary toggle-password" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+
+                            <div id="loginError" class="text-danger text-center"></div>
+
+                            
+                            
+                            
+                            
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">Remember me</label>
+                            </div>
+                            <div class="text-center mt-3">
+                                <button type="submit" id="loginBtn" class="btn btn-primary">Login</button>
+                                <a href="#" class="d-block mt-3">Forgot password?</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        <div class="invalid-feedback">
-                            Please enter your password.
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group form-check">
-                    <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
-                    <label class="form-check-label" for="rememberMe">Remember me</label>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Login</button>
-                <a href="#" class="text-center d-block mt-3">Forgot password?</a>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="loginFailedModal" tabindex="-1" role="dialog" aria-labelledby="loginFailedModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="loginFailedModalLabel">Login Failed</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     $(document).ready(function() {
-        {% if messages %}
-            $('#loginFailedModal').modal('show');
-        {% endif %}
-
-        $('#phone_number').on('input', function() {
-            const phoneNumberInput = $(this);
-            const phoneNumber = phoneNumberInput.val().trim();
-            const passwordInput = $('#password');
-
-            if (phoneNumber.length > 0) {
-                passwordInput.closest('.form-group').slideDown();
+        let errorDisplayed = false;
+    
+        $('#phone_number').on('keyup', function() {
+            checkPhoneNumberLength();
+        });
+    
+        $('#phoneSubmitBtn').on('click', function() {
+            const phoneNumber = $('.phone-number-box').val().trim();
+            if (phoneNumber.length === 10 && phoneNumber.startsWith('98')) {
+                checkPhoneNumber(phoneNumber);
             } else {
-                passwordInput.closest('.form-group').slideUp();
+                $('#phone_error').show(); // Show the error message div
+                errorDisplayed = true;
+
+                $('.phone-number-box').addClass('is-invalid');
+                setTimeout(function() {
+                    $('.phone-number-box').removeClass('is-invalid');
+                }, 2000); // Delay in milliseconds
             }
         });
+    
+        function checkPhoneNumberLength() {
+            const phoneNumber = $('#phone_number').val().trim();
+            if (phoneNumber.length === 10 && phoneNumber.startsWith('98')) {
+                checkPhoneNumber(phoneNumber);
+            } else {
+                $('.phone-number-box').addClass('is-invalid');
+            }
+        }
+    
+        function checkPhoneNumber(phoneNumber) {
+            $.ajax({
+                url: '/accounts/check_phone_number/',
+                type: 'POST',
+                data: {
+                    'phone_number': phoneNumber,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                success: function(response) {
+                    if (response.number_exists) {
+                        $('#phoneStep').slideUp();
+                        $('#loginStep').slideDown();
+                        $('#userPhoneNumber').val(phoneNumber);
 
-        $('#togglePassword').click(function() {
-            const passwordInput = $('#password');
+                    } else {
+                        $('#phoneStep').slideUp();
+                        $('#signupStep').slideDown();
+                        $('#userPhoneNumber').val(phoneNumber);
+
+                    }
+                },
+                error: function() {
+                    console.log('Error occurred while checking the phone number.');
+                }
+            });
+        }
+
+            // Toggle password visibility
+    $('#togglePassword').on('click', function() {
+        const passwordInput = $('#passwordInput');
+        const passwordType = passwordInput.attr('type');
+        passwordInput.attr('type', passwordType === 'password' ? 'text' : 'password');
+        $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+    });
+
+
+
+        $('#signupBtn').on('click', function() {
+            const firstName = $('#firstNameInput').val().trim();
+            const lastName = $('#lastNameInput').val().trim();
+            const phoneNumber = $('#phone_number').val().trim();
+            const password = $('#passwordInput').val().trim();
+
+            // Additional form validation
+            if (firstName === '' || lastName === '' || phoneNumber === '' || password === '') {
+                $('#signupError').text('All fields are required.');
+                //$('#signupError').text(firstName);
+                return;
+            }
+            $.ajax({
+                url: '/accounts/register/',
+                type: 'POST',
+                data: {
+                    'first_name': firstName,
+                    'last_name': lastName,
+                    'phone_number': phoneNumber,
+                    'password1': password,
+                    'password2': password,  // Include password2 for validation
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                success: function(response) {
+                    // Handle success response, e.g., show a success message
+                    if (response.success) {
+                        alert('Registration successful!'); // Show a success message
+                        window.location.href = "{% url 'dashboard:home' %}"; // Redirect to the dashboard
+                    } else {
+                        // Handle errors if any
+                        alert('Registration failed. Please check the form for errors.'); // Show an error message
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle server-side errors
+                    console.error('Registration Error:', xhr.responseText); // Log the response data to the console
+                    alert('An error occurred during registration. Please try again later.'); // Show an error message
+                }
+            });
+        });
+
+        
+        $('#loginBtn').on('click', function() {
+            const phoneNumber = $('#phone_number').val().trim();
+            const password = $('#passwordInput').val().trim();
+            
+            // Additional form validation
+            if (password === '') {
+                $('#loginError').text('Please enter your password.');
+                return;
+            }
+            
+            $.ajax({
+                url: '/accounts/login/',
+                type: 'POST',
+                data: {
+                    'phone_number': phoneNumber,
+                    'password': password,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Handle success response, e.g., redirect to the dashboard
+                        window.location.href = '/dashboard/';
+                    } else {
+                        $('#loginError').text(response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Login Error:', xhr.responseText); // Debug log
+                    $('#loginError').text('An error occurred during login. Please try again.');
+                }
+            });
+        });
+
+        $('#togglePasswordSignup').on('click', function() {
+            const passwordInput = $('#passwordInputSignup');
             const passwordType = passwordInput.attr('type');
             passwordInput.attr('type', passwordType === 'password' ? 'text' : 'password');
             $(this).find('i').toggleClass('fa-eye fa-eye-slash');
         });
         
-        // Form validation
-        $('form').on('submit', function(event) {
-            if (!this.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            $(this).addClass('was-validated');
-        });
+        
+        
+
+
     });
 </script>
+
+<style>
+    .form-group {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        
+    }
+
+</style>
+
+    
 {% endblock %}

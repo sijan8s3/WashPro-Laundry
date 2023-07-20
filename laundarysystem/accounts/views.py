@@ -11,7 +11,9 @@ from django.contrib.auth.forms import PasswordChangeForm
 from .forms import UserDetailsForm
 from django.contrib.auth import update_session_auth_hash
 from .forms import UserDetailsForm, ChangePasswordForm
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ValidationError
 
 
 
@@ -30,13 +32,10 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect('dashboard:home')
+            return JsonResponse({'success': True})
         else:
-            try:
-                user = User.objects.get(phone_number=phone_number)
-                messages.error(request, 'Invalid password.')
-            except User.DoesNotExist:
-                messages.error(request, 'Invalid phone number.')
+            return JsonResponse({'error': 'Invalid password.'})
+
 
     return render(request, 'account/login.html')
 
@@ -48,20 +47,37 @@ def logout_view(request):
 
 User = get_user_model()
 
+@csrf_exempt
 def register(request):
     if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            phone_number = form.cleaned_data['phone_number']
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password1']
-            CustomUser.objects.create_user(first_name=first_name, last_name=last_name, phone_number=phone_number, email=email, password=password)
-            return redirect('account:login')
-    else:
-        form = SignUpForm()
-    return render(request, 'account/register.html', {'form': form})
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        phone_number = request.POST.get('phone_number', '')
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+
+        # Basic form validation
+        if not first_name or not last_name or not phone_number or not password1 or not password2:
+            return JsonResponse({'success': False, 'error': 'All fields are required.'}, status=400)
+
+        # Additional password validation
+        if password1 != password2:
+            return JsonResponse({'success': False, 'error': 'Passwords do not match.'}, status=400)
+
+        # Custom phone number validation if needed
+        # You can add your phone number validation logic here
+
+        # Create the user if the validation passes
+        User = get_user_model()
+        try:
+            user = User.objects.create_user(first_name=first_name, last_name=last_name, phone_number=phone_number, password=password1)
+            return JsonResponse({'success': True})
+        except ValidationError as e:
+            return JsonResponse({'success': False, 'error': e.message}, status=400)
+
+    # Return a bad request response if the request method is not POST
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
 
 
 @login_required
@@ -114,6 +130,7 @@ def update_details(request):
     }
     return render(request, 'account/user_account.html', context)
 
+@login_required
 def change_password(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -127,3 +144,25 @@ def change_password(request):
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'account/change_password.html', {'form': form})
+
+
+
+def check_phone_number(request):
+    if request.method == 'POST':
+        phone_number = request.POST.get('phone_number', None)
+        
+        if phone_number:
+            try:
+                # Check if the phone number already exists in the CustomUser model
+                user = CustomUser.objects.get(phone_number=phone_number)
+                user_exists = True
+            except CustomUser.DoesNotExist:
+                user_exists = False
+
+            return JsonResponse({'number_exists': user_exists})
+        else:
+            return JsonResponse({'error': 'Phone number not provided.'})
+    else:
+        return JsonResponse({'error': 'Invalid request method.'})
+
+

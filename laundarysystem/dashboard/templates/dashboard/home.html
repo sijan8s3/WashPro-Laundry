@@ -8,15 +8,8 @@
   <div class="row">
     <div class="col-md-3">
       <div class="sidebar">
-        <ul class="nav flex-column bg-secondary">
-          <li class="nav-item">
-            <a
-              class="nav-link text-white"
-              href="#users"
-              onclick="showContent('users')"
-              ><i class="fas fa-users"></i> Users</a
-            >
-          </li>
+        <ul class="nav flex-column">
+
           <li class="nav-item">
             <a
               class="nav-link text-white"
@@ -25,6 +18,16 @@
               ><i class="fas fa-shopping-cart"></i> Orders</a
             >
           </li>
+
+
+          {% if request.user.user_type == 'admin' or request.user.user_type == "collection_center" %}
+
+          <li class="nav-item">
+            <a class="nav-link text-white"
+              href="#users"
+              onclick="showContent('users')"><i class="fas fa-users"></i> Users</a>
+          </li>
+          
           <li class="nav-item">
             <a
               class="nav-link text-white"
@@ -49,6 +52,11 @@
               ><i class="fas fa-tags"></i> Cloth Categories</a
             >
           </li>
+          {% endif %}
+
+          {% if request.user.user_type == 'admin' %}
+
+
           <li class="nav-item">
             <a
               class="nav-link text-white"
@@ -57,6 +65,8 @@
               ><i class="fas fa-file-alt"></i> Subscriptions</a
             >
           </li>
+
+          {% endif %}
         </ul>
       </div>
     </div>
@@ -1024,6 +1034,13 @@
       left: 0;
       width: 100%;
     }
+
+      .sidebar {
+        background-color: #ed2027;
+        color: white;
+        height: 100vh;
+      }
+    
   </style>
   {% endblock %}
 </div>

@@ -2,6 +2,7 @@ from django import forms
 from django.forms import formset_factory
 from base.models import *
 from accounts.models import *
+from dashboard.models import *
 from django.core.exceptions import ValidationError
 
 
@@ -58,7 +59,7 @@ from django.forms import inlineformset_factory
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['collection_center', 'pickup_location', 'pickup_date']
+        fields = ['user', 'collection_center', 'pickup_location', 'pickup_date']
 
 OrderItemFormSet = inlineformset_factory(Order, OrderItem, fields=('cloth', 'quantity'), extra=1)
 
@@ -78,3 +79,13 @@ class UserForm(forms.ModelForm):
         if CustomUser.objects.filter(phone_number=phone_number).exists():
             raise ValidationError("A user with this phone number already exists.")
         return phone_number
+    
+
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ['feedback_text', 'image']
+        widgets = {
+            'feedback_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
